@@ -25,9 +25,12 @@ public class EventService {
 	public String eventGet(String clnn, String eventId)
 	{
 		Event event = eventRepository.findByClnn(clnn);
-		//Event event = eventRepository.findByclnnevent(clnn,eventId);
+		Event event2 = eventRepository.findByClnnEvent(clnn,eventId);
 		String findClnn = event.getClnn();
 		String findEventId = event.getEventId();
+		
+		String findClnn2 = event2.getClnn();
+		String findEventId2 = event2.getEventId();
 		
 		return String.format(
 		        "getEvent[clnn=%s, Event='%s']",
