@@ -1,12 +1,12 @@
 package com.example.demo;
 
-
 public class Event {
 	private String id;
 	private String clnn;
 	private String eventId;
 	private String date;
 	
+
 	public String getId() {
 		return id;
 	}
@@ -39,4 +39,13 @@ public class Event {
 		this.date = date;
 	}
 
+	 @Override
+	  public String toString() {
+	    return String.format(
+		        "Event[clnn=%s, Event='%s']",
+	        clnn, eventId);
+	  }
+	 
+	
+	
 }
