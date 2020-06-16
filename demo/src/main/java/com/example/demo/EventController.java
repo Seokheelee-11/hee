@@ -11,13 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class EventController {
 
-	
-	
 	@Autowired
 	private EventService eventService;
-	
-
-	
+		
 	@PostMapping("/setevent")
 	public HashMap<String,String> eventSet(@RequestParam(value = "clnn", defaultValue = "P000000000") String clnn, 
 							@RequestParam(value = "eventId", defaultValue = "default") String eventId) {
