@@ -45,7 +45,6 @@ public class Event {
 		        "Event[clnn=%s, Event='%s']",
 	        clnn, eventId);
 	  }
-	 
-	
+
 	
 }

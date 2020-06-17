@@ -1,10 +1,10 @@
 package com.example.demo;
 
-import java.util.HashMap;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -14,15 +14,31 @@ public class EventController {
 	@Autowired
 	private EventService eventService;
 		
-	@PostMapping("/setevent")
-	public HashMap<String,String> eventSet(@RequestParam(value = "clnn", defaultValue = "P000000000") String clnn, 
-							@RequestParam(value = "eventId", defaultValue = "default") String eventId) {
-		return eventService.eventSet(clnn,eventId);
+	@ResponseBody
+	@RequestMapping(value="/setevent", method=RequestMethod.POST)
+	public EventResult eventSet(@RequestBody Event event) {
+		return eventService.eventSet(event);
 	}
 	
-	@PostMapping("/getevent")
-	public HashMap<String,String> eventGet(@RequestParam(value = "clnn", defaultValue = "P000000000") String clnn, 
-							@RequestParam(value = "eventId", defaultValue = "default") String eventId) {
-		return eventService.eventGet(clnn,eventId);
+	@ResponseBody
+	@RequestMapping(value="/getevent", method=RequestMethod.POST)
+	public EventResult eventGet(@RequestBody Event event) {
+		return eventService.eventGet(event);
 	}
+	
+	@ResponseBody
+	@RequestMapping(value="/deleteevent", method=RequestMethod.POST)
+	public EventResult eventDelete(@RequestBody Event event) {
+		return eventService.eventDelete(event);
+	}
+	
+	
+	
+	@ResponseBody
+	@RequestMapping(value="/testevent", method=RequestMethod.POST)
+	public EventResult eventTest(@RequestBody Event event) {
+		return eventService.eventTest(event);
+	}
+	
+
 }

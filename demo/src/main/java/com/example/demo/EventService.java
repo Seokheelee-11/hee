@@ -2,67 +2,120 @@ package com.example.demo;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EventService {
-
-	
 	@Autowired
 	private EventRepository eventRepository;
 	
-	public HashMap<String,String> eventSet(String clnn, String eventId)
+	public EventResult eventSet(Event event)
 	{
-		HashMap<String,String> result = new HashMap<>();
-		
-		result.put("apply","N");
-		result.put("Date",LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-		result.put("clnn",clnn);
-		result.put("eventId",eventId);	
-		
-		Event findEvent = eventRepository.findByClnnAndEventId(clnn,eventId);
+		EventResult result = new EventResult();
+				
+		Event findEvent = eventRepository.findByClnnAndEventId(event.getClnn(),event.getEventId());
 		System.out.println(findEvent);
-		if(findEvent != null)
+		
+		if(findEvent != null) // clnn, event로 query 조회 결과가 있는경우
 		{
-			result.put("apply","Y");
-			result.put("Date",findEvent.getDate());
+			
+			result.setApply("Y");
+			result.setDate(findEvent.getDate());
+			result.setClnn(findEvent.getClnn());
+			result.setEventId(findEvent.getEventId());
 			return result;
 		}
-		else
+		else // clnn, event로 query 조회 결과가 없는경우
 		{
-			Event setevent = new Event();
-			setevent.setClnn(clnn);
-			setevent.setEventId(eventId);
-			setevent.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-			eventRepository.save(setevent);
+			event.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+			eventRepository.save(event);
+			result.setApply("N");
+			result.setDate(event.getDate());
+			result.setClnn(event.getClnn());
+			result.setEventId(event.getEventId());
 			return result;
 		}
 	}
 	
-	public HashMap<String,String> eventGet(String clnn, String eventId)
+	public EventResult eventGet(Event event)
 	{
-		HashMap<String,String> result = new HashMap<>();
+		EventResult result = new EventResult();
 		
-		result.put("apply","N");
-		result.put("Date",LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-		result.put("clnn",clnn);
-		result.put("eventId",eventId);	
+		Event findEvent = eventRepository.findByClnnAndEventId(event.getClnn(),event.getEventId());
+		System.out.println(findEvent);
 		
-		Event findEvent = eventRepository.findByClnnAndEventId(clnn,eventId);
+		if(findEvent != null) // clnn, event로 query 조회 결과가 있는경우
+		{
+			
+			result.setApply("Y");
+			result.setDate(findEvent.getDate());
+			result.setClnn(findEvent.getClnn());
+			result.setEventId(findEvent.getEventId());
+			return result;
+		}
+		else // clnn, event로 query 조회 결과가 없는경우
+		{
+			event.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+			//eventRepository.save(event);
+			result.setApply("N");
+			result.setDate(event.getDate());
+			result.setClnn(event.getClnn());
+			result.setEventId(event.getEventId());
+			return result;
+		}
+	}
+	
+	public EventResult eventDelete(Event event)
+	{
+		EventResult result = new EventResult();
+		
+		Event findEvent = eventRepository.findByClnnAndEventId(event.getClnn(),event.getEventId());
+		System.out.println(findEvent);
+		
+		if(findEvent != null) // clnn, event로 query 조회 결과가 있는경우 document 삭제
+		{
+			eventRepository.deleteById(findEvent.getId());
+			result.setApply("Y");
+			result.setDate(findEvent.getDate());
+			result.setClnn(findEvent.getClnn());
+			result.setEventId(findEvent.getEventId());
+			return result;
+		}
+		else // clnn, event로 query 조회 결과가 없는경우
+		{
+			event.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+			//eventRepository.save(event);
+			result.setApply("N");
+			result.setDate(event.getDate());
+			result.setClnn(event.getClnn());
+			result.setEventId(event.getEventId());
+			return result;
+		}
+	}	
+	
+	public EventResult eventTest(Event event)
+	{
+		EventResult result = new EventResult();
+		
+		result.setApply("N");
+		result.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+		result.setClnn(event.getClnn());
+		result.setEventId(event.getEventId());	
+		
+		Event findEvent = eventRepository.findByClnnAndEventId(event.getClnn(),event.getEventId());
 		System.out.println(findEvent);
 		if(findEvent != null)
 		{
-			result.put("apply","Y");
-			result.put("Date",findEvent.getDate());
+			result.setApply("Y");
+			result.setDate(findEvent.getDate());
 			return result;
 		}
 		else
 		{
 			return result;
 		}
-	}	
+	}
 }
-//FIXME
+
