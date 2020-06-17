@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.chatbot.eventservice;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,7 +16,7 @@ public class EventService {
 		EventResult result = new EventResult();
 				
 		Event findEvent = eventRepository.findByClnnAndEventId(event.getClnn(),event.getEventId());
-		System.out.println(findEvent);
+		//System.out.println(findEvent);
 		
 		if(findEvent != null) // clnn, event로 query 조회 결과가 있는경우
 		{
@@ -44,7 +44,7 @@ public class EventService {
 		EventResult result = new EventResult();
 		
 		Event findEvent = eventRepository.findByClnnAndEventId(event.getClnn(),event.getEventId());
-		System.out.println(findEvent);
+		//System.out.println(findEvent);
 		
 		if(findEvent != null) // clnn, event로 query 조회 결과가 있는경우
 		{
@@ -72,7 +72,7 @@ public class EventService {
 		EventResult result = new EventResult();
 		
 		Event findEvent = eventRepository.findByClnnAndEventId(event.getClnn(),event.getEventId());
-		System.out.println(findEvent);
+		//System.out.println(findEvent);
 		
 		if(findEvent != null) // clnn, event로 query 조회 결과가 있는경우 document 삭제
 		{
@@ -105,7 +105,7 @@ public class EventService {
 		result.setEventId(event.getEventId());	
 		
 		Event findEvent = eventRepository.findByClnnAndEventId(event.getClnn(),event.getEventId());
-		System.out.println(findEvent);
+		//System.out.println(findEvent);
 		if(findEvent != null)
 		{
 			result.setApply("Y");

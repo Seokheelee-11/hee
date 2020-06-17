@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.chatbot.eventservice;
 
 public class EventResult {
 	private String apply;

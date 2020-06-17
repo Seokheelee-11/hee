@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.chatbot.eventservice;
 
 public class Event {
 	private String id;

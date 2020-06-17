@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.chatbot.eventservice;
 
 import java.util.List;
 
