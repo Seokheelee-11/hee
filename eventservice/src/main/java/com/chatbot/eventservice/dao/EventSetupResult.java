@@ -17,6 +17,20 @@ public class EventSetupResult {
 	private int rank4;
 	private int rank5;
 	
+	public EventSetupResult() {
+		this.apply="N";
+		this.result="";
+		this.dateType="s";
+		this.overLap="N";
+		this.limit="N";
+		this.howManyPeople=0;
+		this.rank1=0;
+		this.rank2=0;
+		this.rank3=0;
+		this.rank4=0;
+		this.rank5=0;
+	}
+	
 	public String getDate() {
 		return date;
 	}

@@ -33,7 +33,7 @@ public class EventSetupService {
 		{
 			result.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 			result.setEventId(eventSetup.getEventId());
-			if(eventSetup.getLimit() == "Y")
+			if(eventSetup.getLimit().equals("Y"))
 			{
 				int howMany;
 				howMany = eventSetup.getRank1() + eventSetup.getRank2() + eventSetup.getRank3() + eventSetup.getRank4() + eventSetup.getRank5();
@@ -47,6 +47,13 @@ public class EventSetupService {
 					result.setHowManyPeople(howMany);
 				}
 			}
+			
+			if(eventSetup.getOverLap().equals("Y")) {
+				
+			}
+			
+			
+			eventSetupRepository.save(result);
 			return result;
 		}
 	}
