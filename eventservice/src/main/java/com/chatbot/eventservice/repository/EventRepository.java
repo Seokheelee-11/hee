@@ -2,7 +2,7 @@ package com.chatbot.eventservice.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import com.chatbot.eventservice.dao.EventResult;
+import com.chatbot.eventservice.dto.EventResult;
 
 
 

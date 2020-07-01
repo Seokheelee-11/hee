@@ -1,4 +1,4 @@
-package com.chatbot.eventservice.dao;
+package com.chatbot.eventservice.dto;
 
 import org.springframework.data.annotation.Id;
 

@@ -1,4 +1,4 @@
-package com.chatbot.eventservice.dao;
+package com.chatbot.eventservice.dto;
 
 public class EventSetupResult {
 	private String apply; // 이벤트 등록 가능 여부

@@ -1,4 +1,4 @@
-package com.chatbot.eventservice.dao;
+package com.chatbot.eventservice.dto;
 
 public class Event {
 	private String eventId;

@@ -6,8 +6,8 @@ import java.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.chatbot.eventservice.dao.EventSetup;
-import com.chatbot.eventservice.dao.EventSetupResult;
+import com.chatbot.eventservice.dto.EventSetup;
+import com.chatbot.eventservice.dto.EventSetupResult;
 import com.chatbot.eventservice.repository.EventSetupRepository;
 
 @Service
@@ -18,7 +18,7 @@ public class EventSetupService {
 	
 	public EventSetupResult eventSet(EventSetup eventSetup)
 	{
-		EventSetupResult result = new EventSetupResult();
+		EventSetup result = new EventSetup();
 		
 		EventSetup findEvent = eventSetupRepository.findByEventId(eventSetup.getEventId());
 		

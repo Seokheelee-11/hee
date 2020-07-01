@@ -1,4 +1,4 @@
-package com.chatbot.eventservice.dao;
+package com.chatbot.eventservice.dto;
 
 public class EventResult {
 	private String apply; // 이벤트 신청 여부 "Y"인 경우 정상적으로 이벤트 신청, "N"이면 이벤트 신청에 문제가 있음
