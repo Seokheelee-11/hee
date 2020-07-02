@@ -3,9 +3,8 @@ package com.chatbot.eventservice.repository;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.chatbot.eventservice.dto.EventSetup;
-import com.chatbot.eventservice.dto.EventSetupResult;
 
-public interface EventSetupRepository extends MongoRepository<EventSetupResult,String>{
+public interface EventSetupRepository extends MongoRepository<EventSetup,String>{
 	
 	public EventSetup findByEventId(String eventId);
 	

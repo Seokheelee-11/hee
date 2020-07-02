@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.chatbot.eventservice.dto.EventSetup;
-import com.chatbot.eventservice.dto.EventSetupResult;
 import com.chatbot.eventservice.repository.EventSetupRepository;
 
 @Service
@@ -16,46 +15,53 @@ public class EventSetupService {
 	@Autowired
 	private EventSetupRepository eventSetupRepository;
 	
-	public EventSetupResult eventSet(EventSetup eventSetup)
-	{
-		EventSetup result = new EventSetup();
+	public EventSetup eventSet(EventSetup inputEvent)
+	{		
+		EventSetup findEvent = eventSetupRepository.findByEventId(inputEvent.getEventId());
 		
-		EventSetup findEvent = eventSetupRepository.findByEventId(eventSetup.getEventId());
-		
+		//이벤트 중복 체크
 		if(findEvent != null) {			
-			result.setResult("eventId 중복");
-			result.setApply("N");
-			result.setDate(findEvent.getDate());			
-			result.setEventId(findEvent.getEventId());
-			return result;
+			inputEvent.setResult("eventId 중복");
+			inputEvent.setDate(findEvent.getDate());	
+			inputEvent.setEventId(findEvent.getEventId());
+			return inputEvent;
 		}
-		else
+		
+		inputEvent.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));	
+		
+		//시작날짜, 종료날짜 입력 체크
+		if(inputEvent.getStartDate() == null || inputEvent.getEndDate() == null) {
+			inputEvent.setResult("StartDate, EndDate에 값을 입력해주세요... ");
+			return inputEvent;
+		}
+			
+		if(inputEvent.getLimit().equals("Y"))
 		{
-			result.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-			result.setEventId(eventSetup.getEventId());
-			if(eventSetup.getLimit().equals("Y"))
-			{
-				int howMany;
-				howMany = eventSetup.getRank1() + eventSetup.getRank2() + eventSetup.getRank3() + eventSetup.getRank4() + eventSetup.getRank5();
-				
-				if(howMany <= 0) {
-					result.setResult("rank 건수 입력 필요 rank1 ~ rank5까지 입력 가능");
-					result.setApply("N");
-					return result;
-				}
-				else {
-					result.setHowManyPeople(howMany);
-				}
+			int howMany;
+			howMany = inputEvent.getRank1() + inputEvent.getRank2() + inputEvent.getRank3() + inputEvent.getRank4() + inputEvent.getRank5();
+			
+			if(howMany <= 0) {
+				inputEvent.setResult("rank 건수 입력 필요 rank1 ~ rank5까지 입력 가능");
+				return inputEvent;
 			}
-			
-			if(eventSetup.getOverLap().equals("Y")) {
-				
+			else {
+				inputEvent.setHowManyPeople(howMany);
 			}
-			
-			
-			eventSetupRepository.save(result);
-			return result;
 		}
+		
+		if(inputEvent.getOverLap().equals("Y")) {
+			if(inputEvent.getDateType() == null) {
+				inputEvent.setResult("dateType 입력 필요");
+				return inputEvent;
+			}
+		}
+				
+		inputEvent.setApply("Y");
+		inputEvent.setResult("정상등록 되었음");
+		
+		
+		eventSetupRepository.save(inputEvent);
+		return inputEvent;
 	}
 	
 	

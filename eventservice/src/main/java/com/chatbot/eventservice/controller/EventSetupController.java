@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chatbot.eventservice.dto.EventSetup;
-import com.chatbot.eventservice.dto.EventSetupResult;
 import com.chatbot.eventservice.service.EventSetupService;
 
 @RestController
@@ -20,7 +19,7 @@ public class EventSetupController {
 	
 	@ResponseBody
 	@RequestMapping(value="/eventSetup", method=RequestMethod.POST)
-	public EventSetupResult eventSetup(@RequestBody EventSetup eventSetup) {
+	public EventSetup eventSetup(@RequestBody EventSetup eventSetup) {
 		
 		return eventSetupService.eventSet(eventSetup);
 	}
