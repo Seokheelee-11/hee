@@ -1,8 +1,12 @@
 package com.chatbot.eventservice.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.chatbot.eventservice.dto.Event;
 import com.chatbot.eventservice.repository.EventRepository;
 
 @Service
@@ -10,7 +14,23 @@ public class EventService {
 	@Autowired
 	private EventRepository eventRepository;
 	
-	
+	public Event applyEvent(Event inputEvent) {
+		
+		if(inputEvent.getEventId()==null) {
+			inputEvent.setResult("EventId를 입력하세요");
+			return inputEvent;
+		}
+		if(inputEvent.getClnn()==null) {
+			inputEvent.setResult("clnn을 입력하세요");
+			return inputEvent;
+		}
+		
+		inputEvent.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+		Event findEvent = eventRepository.findByEventId(inputEvent.getEventId());
+		
+		
+		return inputEvent;
+	}
 
 	
 	/*

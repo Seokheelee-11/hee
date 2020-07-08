@@ -2,15 +2,12 @@ package com.chatbot.eventservice.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import com.chatbot.eventservice.dto.EventResult;
+import com.chatbot.eventservice.dto.Event;
 
 
 
 
-public interface EventRepository  extends MongoRepository<EventResult, String> {
+public interface EventRepository  extends MongoRepository<Event, String> {
 
-	  //public Event findByClnn(String clnn);
-	  //public List<ClnnInfo> findByClnn(String clnn);
-	  //public ClnnInfo findByClnnAndEvent(String clnn,Event event.findByEvent(eventId));
-	  
+	public Event findByEventId(String eventId); 
 }
