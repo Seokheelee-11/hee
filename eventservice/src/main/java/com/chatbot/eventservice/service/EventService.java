@@ -26,7 +26,7 @@ public class EventService {
 		}
 		
 		inputEvent.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-		Event findEvent = eventRepository.findByEventId(inputEvent.getEventId());
+		Event findByEventId = eventRepository.findByEventId(inputEvent.getEventId());
 		
 		
 		return inputEvent;

@@ -59,7 +59,7 @@ public class EventSetupService {
 			return inputEvent;
 		}
 		
-		inputEvent.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern(		)));	
+		inputEvent.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));	
 		inputEvent.setApply("Y");
 		inputEvent.setResult("정상등록 되었음");
 		
