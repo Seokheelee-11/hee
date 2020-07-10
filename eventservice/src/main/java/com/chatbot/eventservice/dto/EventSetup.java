@@ -30,6 +30,8 @@ public class EventSetup {
 	private int rank4;
 	private int rank5;
 	
+	private int[] rank;
+	
 	public EventSetup() {
 		this.apply = "N";
 		this.result= "";

@@ -30,9 +30,12 @@ public class EventSetupService {
 		//limit=y 입력시 rank 값 체크
 		if(inputEvent.getLimit().equals("Y"))
 		{
-			int howMany;
-			howMany = inputEvent.getRank1() + inputEvent.getRank2() + inputEvent.getRank3() + inputEvent.getRank4() + inputEvent.getRank5();
-			
+			int howMany=0;
+			for(int i=0;i<inputEvent.getRank().length;i++)
+			{
+				howMany += inputEvent.getRank()[i];
+			}
+						
 			if(howMany <= 0) {
 				inputEvent.setResult("rank 건수 입력 필요 rank1 ~ rank5까지 입력 가능");
 				return inputEvent;
