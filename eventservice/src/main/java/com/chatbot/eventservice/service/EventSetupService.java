@@ -28,7 +28,7 @@ public class EventSetupService {
 			return inputEvent;
 		}
 		//limit=y 입력시 rank 값 체크
-		if(inputEvent.getLimit().equals("Y"))
+		if(inputEvent.getRank() != null)
 		{
 			int howMany=0;
 			for(int i=0;i<inputEvent.getRank().length;i++)

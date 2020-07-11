@@ -9,5 +9,5 @@ import com.chatbot.eventservice.dto.Event;
 
 public interface EventRepository  extends MongoRepository<Event, String> {
 
-	public Event findByEventId(String eventId); 
+	public Event[] findByEventId(String eventId); 
 }

@@ -23,6 +23,7 @@ public class Event {
 	private String param2;
 	private String param3;
 	
+	private String[] param;
 	
 	/*DB에 저장안할 field*/
 	private String apply; // 이벤트 신청 여부 "Y"인 경우 정상적으로 이벤트 신청, "N"이면 이벤트 신청에 문제가 있음
