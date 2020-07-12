@@ -19,10 +19,9 @@ public class Event {
 	private String eventId;
 	private String clnn;
 	private String date;
-	private String param1;
-	private String param2;
-	private String param3;
-	
+	/*
+	 * private String param1; private String param2; private String param3;
+	 */
 	private String[] param;
 	
 	/*DB에 저장안할 field*/
@@ -37,12 +36,14 @@ public class Event {
 		this.dateCount = 0;
 		this.limitCount = 0;
 		this.rank = 0;
-		this.param1="";
-		this.param2="";
-		this.param3="";
+		/*
+		 * this.param1=""; this.param2=""; this.param3="";
+		 */
 	}
 
 	public int compareTo(Event event) {
+		System.out.println(this.getDate());
+		System.out.println(event.getDate());
 		if(Integer.parseInt(this.date) < Integer.parseInt(event.getDate()))	{
 			return -1;
 		} else if(Integer.parseInt(this.date) == Integer.parseInt(event.getDate())) {

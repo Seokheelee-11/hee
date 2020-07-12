@@ -17,7 +17,7 @@ public class EventController {
 	private EventService eventService;
 	
 	@ResponseBody
-	@RequestMapping(value="/applyEvnet", method=RequestMethod.POST)
+	@RequestMapping(value="/applyEvent", method=RequestMethod.POST)
 	public Event eventApply(@RequestBody Event inputEvent) {
 		return eventService.applyEvent(inputEvent);
 	}

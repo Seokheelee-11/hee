@@ -30,7 +30,7 @@ public class EventService {
 			return inputEvent;
 		}
 		
-		inputEvent.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+		inputEvent.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
 		
 		//EVENTMANAGE DB에서 event 정보 가져오기
 		EventSetup findEventSetup = eventSetupRepository.findByEventId(inputEvent.getEventId());
@@ -63,14 +63,20 @@ public class EventService {
 		//중복신청 가능한지 여부
 		if(findEventSetup.getOverLap().equals("Y"))
 		{
-			Arrays.sort(findEventIdandClnnList);
+			//Arrays.sort(findEventIdandClnnList);
+			for(int i = 0; i < findEventIdandClnnList.length; i++)
+			{
+				System.out.println(findEventIdandClnnList[i].getDate());
+			}
+			
 			//dateType별 비교하여 입력이 가능한지 여부 판단하기
+						
 			
 		}
 		//중복신청 불가능한 경우
 		else
 		{
-			if(findEventIdandClnnList.length > 1)
+			if(findEventIdandClnnList.length >= 1)
 			{
 				inputEvent.setResult("이미 신청하였습니다.");
 				return inputEvent;
@@ -78,7 +84,11 @@ public class EventService {
 		}
 		
 		
+		//inputEvent.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));	
+		inputEvent.setApply("Y");
+		inputEvent.setResult("정상등록 되었음");
 		
+		eventRepository.save(inputEvent);
 		return inputEvent;
 	}
 
