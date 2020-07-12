@@ -2,6 +2,7 @@ package com.chatbot.eventservice.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,9 +43,9 @@ public class EventService {
 		//신청 건수 제한이 있는지? limit을 보고
 		if(findEventSetup.getLimit().equals("Y"))
 		{
-			Event findEventlist[] = eventRepository.findByEventId(inputEvent.getEventId());
+			Event findEventList[] = eventRepository.findByEventId(inputEvent.getEventId());
 			//신청 가능 건수를 넘어간 경우
-			if(findEventlist.length >= findEventSetup.getHowManyPeople())
+			if(findEventList.length >= findEventSetup.getHowManyPeople())
 			{
 				inputEvent.setResult("신청 가능 건수를 넘겼습니다");
 				return inputEvent;
@@ -52,10 +53,30 @@ public class EventService {
 			//여기다가는 rank에 따른 rank값 입력을 해야함.로직 구현 하도록~~
 			else
 			{
-				inputEvent.setLimitCount(findEventlist.length+1);
+				inputEvent.setLimitCount(findEventList.length+1);
 				inputEvent.setRank(2);
 			}
 		}
+		
+		Event findEventIdandClnnList[] = eventRepository.findByEventIdAndClnn(inputEvent.getEventId(), inputEvent.getClnn());
+		
+		//중복신청 가능한지 여부
+		if(findEventSetup.getOverLap().equals("Y"))
+		{
+			Arrays.sort(findEventIdandClnnList);
+			//dateType별 비교하여 입력이 가능한지 여부 판단하기
+			
+		}
+		//중복신청 불가능한 경우
+		else
+		{
+			if(findEventIdandClnnList.length > 1)
+			{
+				inputEvent.setResult("이미 신청하였습니다.");
+				return inputEvent;
+			}
+		}
+		
 		
 		
 		return inputEvent;

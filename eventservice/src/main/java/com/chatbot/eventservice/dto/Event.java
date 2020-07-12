@@ -42,5 +42,14 @@ public class Event {
 		this.param3="";
 	}
 
+	public int compareTo(Event event) {
+		if(Integer.parseInt(this.date) < Integer.parseInt(event.getDate()))	{
+			return -1;
+		} else if(Integer.parseInt(this.date) == Integer.parseInt(event.getDate())) {
+			return 0;
+		} else {
+			return 1;
+		}
+	}
 	
 }
