@@ -1,5 +1,7 @@
 package com.chatbot.eventservice.dto;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -18,7 +20,7 @@ public class Event {
 	private int rank;	// limit인 경우 rank 순위 return
 	private String eventId;
 	private String clnn;
-	private String date;
+	private LocalDateTime date;
 	/*
 	 * private String param1; private String param2; private String param3;
 	 */
