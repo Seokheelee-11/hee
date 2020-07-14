@@ -43,16 +43,16 @@ public class Event {
 		 */
 	}
 
-	public int compareTo(Event event) {
-		System.out.println(this.getDate());
-		System.out.println(event.getDate());
-		if(Integer.parseInt(this.date) < Integer.parseInt(event.getDate()))	{
-			return -1;
-		} else if(Integer.parseInt(this.date) == Integer.parseInt(event.getDate())) {
-			return 0;
-		} else {
-			return 1;
-		}
-	}
+//	public int compareTo(Event event) {
+//		System.out.println(this.getDate());
+//		System.out.println(event.getDate());
+//		if(this.date < event.getDate())	{
+//			return -1;
+//		} else if(Integer.parseInt(this.date) == Integer.parseInt(event.getDate())) {
+//			return 0;
+//		} else {
+//			return 1;
+//		}
+//	}
 	
 }

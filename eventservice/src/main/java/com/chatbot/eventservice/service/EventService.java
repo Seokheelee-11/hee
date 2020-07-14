@@ -52,10 +52,10 @@ public class EventService {
 		 */
 
 		// 신청 건수 제한이 있는지? limit을 보고
-		if (findEventSetup.getHowManyPeople() > 0) {
+		if (findEventSetup.getHowManyLots() > 0) {
 			Event findEventList[] = eventRepository.findByEventId(inputEvent.getEventId());
 			// 신청 가능 건수를 넘어간 경우
-			if (findEventList.length >= findEventSetup.getHowManyPeople()) {
+			if (findEventList.length >= findEventSetup.getHowManyLots()) {
 				inputEvent.setResult("신청 가능 건수를 넘겼습니다");
 				return inputEvent;
 			}
