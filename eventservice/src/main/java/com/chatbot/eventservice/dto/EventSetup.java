@@ -1,6 +1,6 @@
 package com.chatbot.eventservice.dto;
 
-import java.util.HashMap;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,12 +19,12 @@ public class EventSetup {
 	private String result; // date Type이 없음 or rank 수가 없음 등
 	private String eventId;
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private String startDate;
+	private LocalDateTime startDate;
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private String endDate;
+	private LocalDateTime endDate;
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private String date; // 신청시간
-	private String overLap; // 이벤트 명 중복 허용 여부(매일 출석 등)
+	private LocalDateTime date; // 신청시간
+//	private String overLap; // 이벤트 명 중복 허용 여부(매일 출석 등)
 	private String dateType; // "overLap" 필드가 "Y"인 경우 이벤트 명 중복 date 관리("s" : 매초,"d" : 매일, "m" : 매월, "y" : 매년)
 	//private String limit; // 이벤트 신청 가능 명수 제한 여부(선착순 등)
 	private int howManyLots; // 추첨 신청 가능 건수 
@@ -42,7 +42,7 @@ public class EventSetup {
 	public EventSetup() {
 		this.apply = "N";
 		this.result = "";
-		this.overLap = "N";
+//		this.overLap = "N";
 //		this.howManyPeople = 0;
 		//this.limit = "N";
 	}

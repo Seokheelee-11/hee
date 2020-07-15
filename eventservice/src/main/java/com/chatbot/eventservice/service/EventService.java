@@ -23,7 +23,7 @@ public class EventService {
 
 		inputEvent.setDate(LocalDateTime.now());
 		if (inputEvent.getEventId() == null) {
-			inputEvent.setResult("EventId를 입력하세요");
+			inputEvent.error("EventId를 입력하세요");
 			return inputEvent;
 		}
 		if (inputEvent.getClnn() == null) {

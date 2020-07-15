@@ -15,8 +15,7 @@ public class EventSetupController {
 
 	@Autowired
 	private EventSetupService eventSetupService;
-	
-	
+		
 	@ResponseBody
 	@RequestMapping(value="/eventSetup", method=RequestMethod.POST)
 	public EventSetup eventSetup(@RequestBody EventSetup eventSetup) {
