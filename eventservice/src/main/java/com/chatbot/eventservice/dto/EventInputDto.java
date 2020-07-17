@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Document("EVENT")
 @Data
-public class Event {
+public class EventInputDto {
 	@Id
 	public String id;
 
@@ -31,7 +31,7 @@ public class Event {
 	private String result; // 이벤트 신청 결과 이미 신청하여 이용 불가함 or 선착순 끝남 등
 	
 	
-	public Event() {
+	public EventInputDto() {
 		this.apply="N";
 		this.result="";
 		this.applyCount = 0;

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.chatbot.eventservice.dto.Event;
+import com.chatbot.eventservice.domain.Event;
 import com.chatbot.eventservice.service.EventService;
 
 @RestController

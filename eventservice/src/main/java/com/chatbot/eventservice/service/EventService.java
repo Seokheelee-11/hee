@@ -7,8 +7,8 @@ import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.chatbot.eventservice.dto.Event;
-import com.chatbot.eventservice.dto.EventSetup;
+import com.chatbot.eventservice.domain.Event;
+import com.chatbot.eventservice.domain.EventSetup;
 import com.chatbot.eventservice.repository.EventRepository;
 import com.chatbot.eventservice.repository.EventSetupRepository;
 
@@ -23,7 +23,7 @@ public class EventService {
 
 		inputEvent.setDate(LocalDateTime.now());
 		if (inputEvent.getEventId() == null) {
-			inputEvent.error("EventId를 입력하세요");
+			inputEvent.setResult("EventId를 입력하세요");
 			return inputEvent;
 		}
 		if (inputEvent.getClnn() == null) {
