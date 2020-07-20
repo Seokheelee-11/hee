@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.chatbot.eventservice.domain.Event;
+import com.chatbot.eventservice.dto.EventInputDto;
+import com.chatbot.eventservice.dto.EventOutputDto;
 import com.chatbot.eventservice.service.EventService;
 
 @RestController
@@ -18,7 +19,7 @@ public class EventController {
 	
 	@ResponseBody
 	@RequestMapping(value="/applyEvent", method=RequestMethod.POST)
-	public Event eventApply(@RequestBody Event inputEvent) {
-		return eventService.applyEvent(inputEvent);
+	public EventOutputDto eventApply(@RequestBody EventInputDto eventInputDto) {
+		return eventService.applyEvent(eventInputDto);
 	}
 }
