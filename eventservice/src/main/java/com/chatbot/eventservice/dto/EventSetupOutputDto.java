@@ -1,5 +1,6 @@
 package com.chatbot.eventservice.dto;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -14,8 +15,8 @@ public class EventSetupOutputDto {
 	private String resultStatus;
 	private String responseMessage;
 	private String eventId;
-	private String startDate;
-	private String endDate;
+	private LocalDateTime startDate;
+	private LocalDateTime endDate;
 	private DateType dateType; //이벤트 명 중복 date 관리(ALL - 중복 조건 없음, MIN - 분단위, HOURS - 시간 단위, DAY - 일 단위 ~~ 중복 허용)
 	private RewardType rewardType;
 

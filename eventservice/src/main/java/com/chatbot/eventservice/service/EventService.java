@@ -7,6 +7,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.chatbot.eventservice.ModelMapperConfig;
 import com.chatbot.eventservice.domain.Event;
 import com.chatbot.eventservice.domain.Event.History;
 import com.chatbot.eventservice.domain.EventSetup;
@@ -22,6 +23,8 @@ public class EventService {
 	private EventRepository eventRepository;
 	@Autowired
 	private EventSetupRepository eventSetupRepository;
+	@Autowired
+	private ModelMapperConfig modelMapperConfig;
 	
 
 	public EventOutputDto applyEvent(EventInputDto eventInputDto) {
@@ -85,8 +88,11 @@ public class EventService {
 			case ALL:{
 				
 			}
-			
 			}
+			event = findEventIdandClnn;
+		}
+		else {
+			
 		}
 
 		// rewardType이 default가 아닌 경우
@@ -113,6 +119,7 @@ public class EventService {
 					//이번 신청건을 집어넣었을 때, total count와 같아 진다면 더이상 사용 불가하므로 closing status를 Y로 바꿈
 					if(totalCount + 1 >=findEventSetup.getTotalCount()) {
 						findEventSetup.setClosingStatus("Y");
+						eventSetupRepository.save(findEventSetup);
 					}
 					
 				}
@@ -126,19 +133,25 @@ public class EventService {
 			inputHistory.setRewardName("DEFAULT");
 		}
 		
-		int length = findEventIdandClnn.historyLogLength()+1;
+		
+		System.out.println(findEventIdandClnn);
+		System.out.println(event);
+		int length = event.historyLogLength()+1;
 		System.out.println(length);
 		inputHistory.setOrderCount(length);
 		//System.out.println(event);
-		System.out.println(findEventIdandClnn);
+
 		//System.out.println(findEventSetup);
 		System.out.println(inputHistory);
-		findEventIdandClnn.historyLogAdd(inputHistory);
-		findEventIdandClnn.setTotalOrderCount(inputHistory.getOrderCount());
-		findEventIdandClnn.setLastModDate(inputHistory.getDate());
+		event.historyLogAdd(inputHistory);
+		event.setTotalOrderCount(inputHistory.getOrderCount());
+		event.setLastModDate(inputHistory.getDate());
 		
-		eventRepository.save(findEventIdandClnn);
-
+		eventRepository.save(event);
+		
+	
+		
+		modelMapper.addMappings(modelMapperConfig.eventToEventOutputMap);
 		eventOutputDto = modelMapper.map(event, EventOutputDto.class);
 	
 		//eventmanage의 resultinfo 의 key값에 대응하는 결과 가져오기

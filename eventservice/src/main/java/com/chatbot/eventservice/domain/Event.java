@@ -37,15 +37,26 @@ public class Event {
 		return this.historyLog.size();
 	}
 	
+	public int getHistoryLogOrderCount() {
+			return this.historyLog.get(historyLog.size()-1).getOrderCount();
+	}
+	public List<String> getHistoryLogParam() {
+		return this.historyLog.get(historyLog.size()-1).getParam();
+	}
+	
+	public History getHistoryEnd() {
+		return this.historyLog.get(historyLog.size()-1);
+	}
+	
+
+	
 	@Data	
 	public static class History{
 		private int orderCount;
 		private List<String> param;
 		private LocalDateTime date;
 		private String rewardName;
-		public History() {
-			
-		}
+
 	}	
 	
 

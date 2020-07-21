@@ -1,5 +1,8 @@
 package com.chatbot.eventservice.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 import org.modelmapper.ModelMapper;
@@ -7,6 +10,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.chatbot.eventservice.ModelMapperConfig;
 import com.chatbot.eventservice.domain.EventSetup;
 import com.chatbot.eventservice.domain.EventSetup.RewardType;
 import com.chatbot.eventservice.dto.EventSetupInputDto;
@@ -18,17 +22,23 @@ public class EventSetupService {
 
 	@Autowired
 	private EventSetupRepository eventSetupRepository;
+	
+	@Autowired
+	private ModelMapperConfig modelMapperConfig;
 
 	public EventSetupOutputDto eventSet(EventSetupInputDto eventSetupInputDto) {
 
 		ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-	
+		
+		LocalDateTime startdateformat = LocalDateTime.parse(eventSetupInputDto.getStartDate());
+		System.out.println(eventSetupInputDto.getStartDate());
+		System.out.println(startdateformat);
+		
+		
 		EventSetup eventSetup = modelMapper.map(eventSetupInputDto, EventSetup.class);
 		EventSetupOutputDto eventSetupOutputDto = new EventSetupOutputDto();
-		
-		System.out.println(eventSetupInputDto);
-		System.out.println(eventSetup);
+
 
 		if (eventSetup.getEventId() == null) {
 			eventSetupOutputDto.setResponseMessage("eventId를 입력해주세요");
@@ -41,7 +51,11 @@ public class EventSetupService {
 			return eventSetupOutputDto;
 		}
 		System.out.println("시작날짜, 종료날짜 입력 포맷 체크 구현");
+		
 		//시작날짜, 종료날짜 입력 포맷 체크 구현
+		System.out.println(eventSetup);
+		
+		
 		
 		System.out.println("EventId로 DB 조회");
 		//EventId로 DB 조회
