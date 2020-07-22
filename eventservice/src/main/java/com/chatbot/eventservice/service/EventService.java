@@ -1,6 +1,13 @@
 package com.chatbot.eventservice.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -11,6 +18,7 @@ import com.chatbot.eventservice.ModelMapperConfig;
 import com.chatbot.eventservice.domain.Event;
 import com.chatbot.eventservice.domain.Event.History;
 import com.chatbot.eventservice.domain.EventSetup;
+import com.chatbot.eventservice.domain.EventSetup.DateType;
 import com.chatbot.eventservice.domain.EventSetup.RewardType;
 import com.chatbot.eventservice.dto.EventInputDto;
 import com.chatbot.eventservice.dto.EventOutputDto;
@@ -25,7 +33,6 @@ public class EventService {
 	private EventSetupRepository eventSetupRepository;
 	@Autowired
 	private ModelMapperConfig modelMapperConfig;
-	
 
 	public EventOutputDto applyEvent(EventInputDto eventInputDto) {
 
@@ -37,7 +44,9 @@ public class EventService {
 
 		History inputHistory = new History();
 		inputHistory.setDate(LocalDateTime.now());
-
+		System.out.println(ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Asia/Seoul")));
+		//inputHistory.setDate(ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Asia/Seoul")));
+		System.out.println(LocalDateTime.now());
 		// EventID 입력 됨?
 		if (event.getEventId() == null) {
 			eventOutputDto.setResponseMessage("EventId를 입력하세요");
@@ -60,48 +69,122 @@ public class EventService {
 		}
 
 		// 신청가능 기간인지 확인
-//		if (findEventSetup.getStartDate()) > Integer.parseInt(inputEvent.getDate())
-//				|| Integer.parseInt(findEventSetup.getEndDate()) < Integer.parseInt(inputEvent.getDate())) {
-//			inputEvent.setResult("event 신청가능 기간이 아닙니다.");
-//			return inputEvent;
-//		}
+		if (!findEventSetup.getStartDate().isBefore(inputHistory.getDate())
+				|| !findEventSetup.getEndDate().isAfter(inputHistory.getDate())) {
+			eventOutputDto.setResponseMessage("event 신청가능 기간이 아닙니다.");
+			return eventOutputDto;
+		}
 
 		// eventId and Clnn 조회
 		Event findEventIdandClnn = eventRepository.findByEventIdAndClnn(event.getEventId(), event.getClnn());
-		
+
 		if (findEventIdandClnn != null) {
-			switch (findEventSetup.getDateType()) {
+			History endHistoryLog = findEventIdandClnn.getHistoryEnd();
+//			ZonedDateTime lastModTimme = findEventIdandClnn.getLastModDate().atZone(ZoneId.of("Asia/Seoul"));
+			LocalDateTime lastModDate = findEventIdandClnn.getLastModDate(); 
+			
 			// DEFAULT인 경우 더이상 신청 불가한 상황임
-			case DEFAULT: {
+			if(DateType.DEFAULT.equals(findEventSetup.getDateType())){
 				eventOutputDto.setResponseMessage("이미 이벤트에 신청되었습니다");
 				return eventOutputDto;
 			}
 			// MIN~ YEAR 까지 dateType에 따른 결과값 낼 수 있도록 하기
-			case MIN:
-			case HOUR:
-			case DAY:
-			case MONTH:
-			case YEAR: {
-
+			else if(DateType.MIN.equals(findEventSetup.getDateType())){
+//				if (inputHistory.getDate().isBefore(endHistoryLog.getDate().minusMinutes(1))) {
+				if (inputHistory.getDate().isBefore(lastModDate.plusMinutes(1))) {
+					System.out.println("MIN에 들어옴");
+					eventOutputDto.setResponseMessage("1분 이내 이벤트 신청 내역이 있습니다.");
+					return eventOutputDto;
+				}
+			}
+				
+			else if(DateType.HOUR.equals(findEventSetup.getDateType())){
+				if (inputHistory.getDate().isBefore(lastModDate.plusHours(1))) {
+					eventOutputDto.setResponseMessage("1시간 이내 이벤트 신청 내역이 있습니다.");
+					return eventOutputDto;
+				}
+			}
+			else if(DateType.DAY.equals(findEventSetup.getDateType())){
+				if (inputHistory.getDate().isBefore(lastModDate.plusDays(1))) {
+					eventOutputDto.setResponseMessage("금일 이벤트 신청 내역이 있습니다.");
+					return eventOutputDto;
+				}
+			}
+			else if(DateType.MONTH.equals(findEventSetup.getDateType())){
+				if (inputHistory.getDate().isBefore(lastModDate.plusMonths(1))) {
+					eventOutputDto.setResponseMessage("금일 이벤트 신청 내역이 있습니다.");
+					return eventOutputDto;
+				}
+			}
+			else if(DateType.YEAR.equals(findEventSetup.getDateType())){
+				if (inputHistory.getDate().isBefore(endHistoryLog.getDate().plusYears(1))) {
+					eventOutputDto.setResponseMessage("금일 이벤트 신청 내역이 있습니다.");
+					return eventOutputDto;
+				}
 			}
 			// ALL 인 경우 언제든 신청 가능함.
-			case ALL:{
-				
-			}
-			}
+			else if(DateType.ALL.equals(findEventSetup.getDateType())){
+			}			
 			event = findEventIdandClnn;
-		}
-		else {
-			
-		}
+		} 
 
 		// rewardType이 default가 아닌 경우
 		if (!RewardType.DEFAULT.equals(findEventSetup.getRewardType())) {
 			if ("N".equals(findEventSetup.getClosingStatus())) {
 				// reward 구하는 로직 구현 임시로 "starbucks"
 				inputHistory.setRewardName("starbucks");
-								
+				
 				Event[] findEventId = eventRepository.findByEventId(event.getEventId());
+				//findEventId null 체크 안해도됨?
+				
+				Set<String> keys = findEventSetup.getRewardInfo().keySet();
+				LinkedHashMap<String, Integer> winner = new LinkedHashMap<String,Integer>();
+				
+				for(String key : keys) {
+					int count = 0;
+					for(int i = 0; i< findEventId.length;i++){
+						List<String> eventReward = findEventId[i].getHistoryLogRewards();
+						for(int j=0; j<eventReward.size();j++) {
+							if(key.equals(eventReward.get(j))) {
+								count++;
+							}
+						}
+					}
+					winner.put(key, count);
+				}
+								
+				LinkedHashMap<String, Integer> probwinner = new LinkedHashMap<String,Integer>();
+				int totalwinner = 0;
+				for(String key:keys) {
+					int probcount = findEventSetup.getRewardInfo().get(key) - winner.get(key);
+					probwinner.put(key, probcount);
+					totalwinner += probcount;
+				}
+				
+				if(RewardType.FCFS.equals(findEventSetup.getRewardType())) {
+					for(String key:keys) {
+						if(probwinner.get(key)==0){
+							continue;
+						}
+						else {
+							inputHistory.setRewardName(key);
+							break;
+						}
+					}
+				}
+				else if(RewardType.RANDOM.equals(findEventSetup.getRewardType())) {
+					List<String> randomTimeLine = new ArrayList<String>();
+					for(String key:keys) {
+						for(int i = 0; i< probwinner.get(key);i++) {
+							randomTimeLine.add(key);
+						}
+					}
+					Random rand = new Random();
+					int iValue = rand.nextInt(totalwinner);
+					inputHistory.setRewardName(randomTimeLine.get(iValue));
+				}
+				
+				// 이 eventId로 더신청이 가능한지 불가능한지 판단하는 것임
 				// eventId로 조회 결과가 없는 경우
 				if (findEventId == null) {
 					if (findEventSetup.getTotalCount() <= 1) {
@@ -110,21 +193,18 @@ public class EventService {
 				}
 				// eventId로 조회 결과가 있는 경우 total count 비교해서 closestatus 상태 변경
 				else {
-					//event Id로 신청된 건수를 전부 가져옴
+					// event Id로 신청된 건수를 전부 가져옴
 					int totalCount = 0;
 					for (int i = 0; i < findEventId.length; i++) {
 						totalCount += findEventId[i].getTotalOrderCount();
 					}
-					
-					//이번 신청건을 집어넣었을 때, total count와 같아 진다면 더이상 사용 불가하므로 closing status를 Y로 바꿈
-					if(totalCount + 1 >=findEventSetup.getTotalCount()) {
+					// 이번 신청건을 집어넣었을 때, total count와 같아 진다면 더이상 사용 불가하므로 closing status를 Y로 바꿈
+					if (totalCount + 1 >= findEventSetup.getTotalCount()) {
 						findEventSetup.setClosingStatus("Y");
 						eventSetupRepository.save(findEventSetup);
 					}
-					
 				}
-			} 
-			else {
+			} else {
 
 				eventOutputDto.setResponseMessage("신청 가능 건수를 초과하였습니다.");
 				return eventOutputDto;
@@ -132,45 +212,37 @@ public class EventService {
 		} else {
 			inputHistory.setRewardName("DEFAULT");
 		}
-		
-		
+
 		System.out.println(findEventIdandClnn);
 		System.out.println(event);
-		int length = event.historyLogLength()+1;
+		int length = event.historyLogLength() + 1;
 		System.out.println(length);
 		inputHistory.setOrderCount(length);
-		//System.out.println(event);
+		// System.out.println(event);
 
-		//System.out.println(findEventSetup);
+		// System.out.println(findEventSetup);
 		System.out.println(inputHistory);
 		event.historyLogAdd(inputHistory);
 		event.setTotalOrderCount(inputHistory.getOrderCount());
 		event.setLastModDate(inputHistory.getDate());
-		
+
 		eventRepository.save(event);
-		
-	
-		
+
 		modelMapper.addMappings(modelMapperConfig.eventToEventOutputMap);
 		eventOutputDto = modelMapper.map(event, EventOutputDto.class);
-	
-		//eventmanage의 resultinfo 의 key값에 대응하는 결과 가져오기
-		if(findEventSetup.getResultInfo().containsKey(inputHistory.getRewardName())) {
-			eventOutputDto
-			.setResultInfo(
-					findEventSetup
-					.getResultInfo()
-					.get(inputHistory.getRewardName())
-					);
+
+		// eventmanage의 resultinfo 의 key값에 대응하는 결과 가져오기
+		if (findEventSetup.getResultInfo().containsKey(inputHistory.getRewardName())) {
+			eventOutputDto.setResultInfo(findEventSetup.getResultInfo().get(inputHistory.getRewardName()));
 		}
 		eventOutputDto.setResponseMessage("정상등록 되었음");
 		eventOutputDto.setResultStatus("Y");
-	
+
 		return eventOutputDto;
 	}
 }
-		
-		// 신청 건수 제한이 있는지? limit을 보고
+
+// 신청 건수 제한이 있는지? limit을 보고
 //		if (findEventSetup.getHowManyLots() > 0) {
 //			Event findEventList[] = eventRepository.findByEventId(inputEvent.getEventId());
 //			// 신청 가능 건수를 넘어간 경우
@@ -188,8 +260,8 @@ public class EventService {
 //		Event findEventIdandClnnList[] = eventRepository.findByEventIdAndClnn(inputEvent.getEventId(),
 //				inputEvent.getClnn());
 
-		// 중복신청 가능한지 여부
-		// "Y".equals(findEventId
+// 중복신청 가능한지 여부
+// "Y".equals(findEventId
 //		if (findEventSetup.getOverLap().equals("Y")) {
 //			// Arrays.sort(findEventIdandClnnList);
 //			/*
@@ -215,7 +287,7 @@ public class EventService {
 //			}
 //
 //		}
-		// 중복신청 불가능한 경우
+// 중복신청 불가능한 경우
 //		else {
 //			if (findEventIdandClnnList.length >= 1) {
 //				inputEvent.setResult("이미 신청하였습니다.");
@@ -223,8 +295,7 @@ public class EventService {
 //			}
 //		}
 
-		// inputEvent.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
-
+// inputEvent.setDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
 
 //	
 //	public EventResult eventSet(Event event) {
@@ -328,5 +399,3 @@ public class EventService {
 //		return result;
 //	}
 //}
-
-

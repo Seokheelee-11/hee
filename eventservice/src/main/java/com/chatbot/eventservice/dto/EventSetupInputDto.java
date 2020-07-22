@@ -1,7 +1,10 @@
 package com.chatbot.eventservice.dto;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import com.chatbot.eventservice.domain.EventSetup.DateType;
 import com.chatbot.eventservice.domain.EventSetup.RewardType;
@@ -20,13 +23,28 @@ public class EventSetupInputDto {
 	private LinkedHashMap<String, Integer> rewardInfo = new LinkedHashMap<>();
 	private HashMap<String,HashMap<String,String>> resultInfo = new HashMap<>();
 
-	private String[] targetClnn;
-	private String[] nonTargetClnn;
+	private List<String> targetClnn;
+	private List<String> nonTargetClnn;
 	
+	public LocalDateTime parsedStartDate() {
+//		LocalDateTime zdt = LocalDateTime.of(LocalDateTime.parse(startDate), ZoneId.of("Asia/Seoul"));
+//		System.out.println(zdt);
+//		return zdt;
+		return LocalDateTime.parse(startDate);
+	}
+	
+	public LocalDateTime parsedEndDate() {
+//		LocalDateTime zdt = LocalDateTime.of(LocalDateTime.parse(endDate), ZoneId.of("Asia/Seoul"));
+//		System.out.println(zdt);
+//		return zdt;
+		return LocalDateTime.parse(endDate);
+	}
 	
 	public EventSetupInputDto() {
 		this.dateType = DateType.DEFAULT;
 		this.rewardType = RewardType.DEFAULT;
+		targetClnn = new ArrayList<String>();
+		nonTargetClnn = new ArrayList<String>();
 	}
 	
 

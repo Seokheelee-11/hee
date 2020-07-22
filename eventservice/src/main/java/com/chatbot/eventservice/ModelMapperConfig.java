@@ -14,8 +14,9 @@ public class ModelMapperConfig {
 
 	public PropertyMap<EventSetupInputDto, EventSetup> EventSetupInputToEventMap= new PropertyMap<EventSetupInputDto, EventSetup>() {
 		protected void configure() {
-//			map().setStartDate(source.getStartDate());
-//			map().setEndDate(source.getEndDate());
+
+			map().setStartDate(source.parsedStartDate());
+			map().setEndDate(source.parsedEndDate());
 		}
 	};
 

@@ -1,8 +1,10 @@
 package com.chatbot.eventservice.dto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import com.chatbot.eventservice.domain.EventSetup.DateType;
 import com.chatbot.eventservice.domain.EventSetup.RewardType;
@@ -23,12 +25,14 @@ public class EventSetupOutputDto {
 	private LinkedHashMap<String, Integer> rewardInfo = new LinkedHashMap<>();
 	private HashMap<String,HashMap<String,String>> resultInfo = new HashMap<>();
 
-	private String[] targetClnn;
-	private String[] nonTargetClnn;
+	private List<String> targetClnn;
+	private List<String> nonTargetClnn;
 	
 	private int totalCount; // 추첨, 선착순 신청 가능 건수 
 	
 	public EventSetupOutputDto() {
 		this.resultStatus = "N";
+		targetClnn = new ArrayList<String>();
+		nonTargetClnn = new ArrayList<String>();
 	}
 }

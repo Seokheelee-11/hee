@@ -1,8 +1,10 @@
 package com.chatbot.eventservice.domain;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -25,14 +27,19 @@ public class EventSetup {
 	private LinkedHashMap<String, Integer> rewardInfo = new LinkedHashMap<>();
 	private HashMap<String,HashMap<String,String>> resultInfo = new HashMap<>();
 
-	private String[] targetClnn;
-	private String[] nonTargetClnn;
+	private List<String> targetClnn;
+	private List<String> nonTargetClnn;
 	
 	private int totalCount; // 추첨, 선착순 신청 가능 건수 
 	private String closingStatus;
 	
+
+	
+	
 	public EventSetup() {
 		this.closingStatus = "N";
+		targetClnn = new ArrayList<String>();
+		nonTargetClnn = new ArrayList<String>();
 	}
 	
 	public enum DateType{

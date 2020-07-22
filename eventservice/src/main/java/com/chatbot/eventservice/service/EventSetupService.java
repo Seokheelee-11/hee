@@ -1,8 +1,5 @@
 package com.chatbot.eventservice.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 import org.modelmapper.ModelMapper;
@@ -28,14 +25,11 @@ public class EventSetupService {
 
 	public EventSetupOutputDto eventSet(EventSetupInputDto eventSetupInputDto) {
 
-		ModelMapper modelMapper = new ModelMapper();
+		
+ 		ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 		
-		LocalDateTime startdateformat = LocalDateTime.parse(eventSetupInputDto.getStartDate());
-		System.out.println(eventSetupInputDto.getStartDate());
-		System.out.println(startdateformat);
-		
-		
+		modelMapper.addMappings(modelMapperConfig.EventSetupInputToEventMap);
 		EventSetup eventSetup = modelMapper.map(eventSetupInputDto, EventSetup.class);
 		EventSetupOutputDto eventSetupOutputDto = new EventSetupOutputDto();
 
@@ -50,13 +44,14 @@ public class EventSetupService {
 			eventSetupOutputDto.setResponseMessage("StartDate, EndDate에 값을 입력해주세요... ");
 			return eventSetupOutputDto;
 		}
-		System.out.println("시작날짜, 종료날짜 입력 포맷 체크 구현");
+		System.out.println("시작날짜 < 종료날짜 인지 체크");
+		//시작날짜 < 종료날짜 인지 체크
+		if(eventSetup.getStartDate().isAfter(eventSetup.getEndDate())) {
+			eventSetupOutputDto.setResponseMessage("StartDate가 EndDate보다 늦습니다. ");
+			return eventSetupOutputDto;
+		}
 		
-		//시작날짜, 종료날짜 입력 포맷 체크 구현
-		System.out.println(eventSetup);
-		
-		
-		
+				
 		System.out.println("EventId로 DB 조회");
 		//EventId로 DB 조회
 		EventSetup findEvent = eventSetupRepository.findByEventId(eventSetup.getEventId());		
@@ -90,7 +85,7 @@ public class EventSetupService {
 		eventSetupOutputDto.setResultStatus("Y");
 		eventSetupOutputDto.setResponseMessage("정상등록 되었음");
 		System.out.println(eventSetupOutputDto);
-		return eventSetupOutputDto;
 
+		return eventSetupOutputDto;
 	}
 }

@@ -26,6 +26,7 @@ public class Event {
 	public Event() {
 		this.totalOrderCount = 0;
 		this.historyLog = new ArrayList<History>();
+		
 	}
 	
 	public void historyLogAdd(History inputHistory) {
@@ -48,6 +49,14 @@ public class Event {
 		return this.historyLog.get(historyLog.size()-1);
 	}
 	
+	public List<String> getHistoryLogRewards(){
+		List<String> returnString = new ArrayList<String>();
+		
+		for(int i = 0; i< historyLog.size();i++) {
+			returnString.add(this.historyLog.get(i).rewardName);
+		}
+		return returnString;
+	}
 
 	
 	@Data	
@@ -56,6 +65,10 @@ public class Event {
 		private List<String> param;
 		private LocalDateTime date;
 		private String rewardName;
+		
+		public History() {
+			param = new ArrayList<String>();
+		}
 
 	}	
 	

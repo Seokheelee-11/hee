@@ -1,6 +1,7 @@
 package com.chatbot.eventservice.dto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,5 +26,9 @@ public class EventOutputDto {
 	private int dDateCount;
 	
 	private Map<String,String> resultInfo = new HashMap<String,String>();
+	
+	public EventOutputDto() {
+		param = new ArrayList<String>();
+	}
 	
 }
