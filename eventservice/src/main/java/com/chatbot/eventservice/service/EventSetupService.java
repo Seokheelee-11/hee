@@ -65,7 +65,7 @@ public class EventSetupService {
 		
 		System.out.println("추첨 혹은 선착순 일때 total count 입력");
 		// 추첨 or 선착순 일때 total count 입력
-		if(eventSetup.getRewardType()!=RewardType.DEFAULT)
+		if(RewardType.FCFS.equals(eventSetup.getRewardType()) ||RewardType.RANDOM.equals(eventSetup.getRewardType()))
 		{
 			int totalCount = 0;
 			Set<String> keys = eventSetup.getRewardInfo().keySet();
@@ -75,6 +75,19 @@ public class EventSetupService {
 				totalCount += eventSetup.getRewardInfo().get(key);
 			}
 			eventSetup.setTotalCount(totalCount);
+		}
+		else if(RewardType.RANDOMPROB.equals(eventSetup.getRewardType())) {
+			Double totalCount = 0.0;
+			Set<String> keys = eventSetup.getRewardInfo().keySet();
+
+			for (String key : keys) {
+				//System.out.println(key);
+				totalCount += eventSetup.getRewardInfo().get(key);
+			}
+			if(totalCount >1) {
+				eventSetupOutputDto.setResponseMessage("RANDOM 확률의 총 합은 1을 넘을 수 없습니다. 현재 총합 : " + totalCount);
+				return eventSetupOutputDto;
+			}
 		}
 		System.out.println(eventSetup);
 //		eventSetup.setDate(LocalDateTime.now());

@@ -1,8 +1,10 @@
 package com.chatbot.eventservice.service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -96,6 +98,9 @@ public class EventService {
 					eventOutputDto.setResponseMessage("1분 이내 이벤트 신청 내역이 있습니다.");
 					return eventOutputDto;
 				}
+				else {
+					eventOutputDto.setDDateCount(ChronoUnit.MINUTES.between(findEventSetup.getStartDate(), inputHistory.getDate())+1);
+				}
 			}
 				
 			else if(DateType.HOUR.equals(findEventSetup.getDateType())){
@@ -103,11 +108,17 @@ public class EventService {
 					eventOutputDto.setResponseMessage("1시간 이내 이벤트 신청 내역이 있습니다.");
 					return eventOutputDto;
 				}
+				else {
+					eventOutputDto.setDDateCount(ChronoUnit.HOURS.between(findEventSetup.getStartDate(), inputHistory.getDate())+1);
+				}
 			}
 			else if(DateType.DAY.equals(findEventSetup.getDateType())){
 				if (inputHistory.getDate().isBefore(lastModDate.plusDays(1))) {
 					eventOutputDto.setResponseMessage("금일 이벤트 신청 내역이 있습니다.");
 					return eventOutputDto;
+				}
+				else {
+					eventOutputDto.setDDateCount(ChronoUnit.DAYS.between(findEventSetup.getStartDate(), inputHistory.getDate())+1);
 				}
 			}
 			else if(DateType.MONTH.equals(findEventSetup.getDateType())){
@@ -115,11 +126,17 @@ public class EventService {
 					eventOutputDto.setResponseMessage("금일 이벤트 신청 내역이 있습니다.");
 					return eventOutputDto;
 				}
+				else {
+					eventOutputDto.setDDateCount(ChronoUnit.MONTHS.between(findEventSetup.getStartDate(), inputHistory.getDate())+1);
+				}
 			}
 			else if(DateType.YEAR.equals(findEventSetup.getDateType())){
 				if (inputHistory.getDate().isBefore(endHistoryLog.getDate().plusYears(1))) {
 					eventOutputDto.setResponseMessage("금일 이벤트 신청 내역이 있습니다.");
 					return eventOutputDto;
+				}
+				else {
+					eventOutputDto.setDDateCount(ChronoUnit.YEARS.between(findEventSetup.getStartDate(), inputHistory.getDate())+1);
 				}
 			}
 			// ALL 인 경우 언제든 신청 가능함.
@@ -127,21 +144,22 @@ public class EventService {
 			}			
 			event = findEventIdandClnn;
 		} 
-
+		
+		Event[] findEventId = eventRepository.findByEventId(event.getEventId());
 		// rewardType이 default가 아닌 경우
-		if (!RewardType.DEFAULT.equals(findEventSetup.getRewardType())) {
+		if(RewardType.FCFS.equals(findEventSetup.getRewardType()) ||RewardType.RANDOM.equals(findEventSetup.getRewardType())){
 			if ("N".equals(findEventSetup.getClosingStatus())) {
 				// reward 구하는 로직 구현 임시로 "starbucks"
-				inputHistory.setRewardName("starbucks");
+//				inputHistory.setRewardName("starbucks");
 				
-				Event[] findEventId = eventRepository.findByEventId(event.getEventId());
+				
 				//findEventId null 체크 안해도됨?
 				
 				Set<String> keys = findEventSetup.getRewardInfo().keySet();
-				LinkedHashMap<String, Integer> winner = new LinkedHashMap<String,Integer>();
+				LinkedHashMap<String, Double> winner = new LinkedHashMap<String,Double>();
 				
 				for(String key : keys) {
-					int count = 0;
+					Double count = 0.0;
 					for(int i = 0; i< findEventId.length;i++){
 						List<String> eventReward = findEventId[i].getHistoryLogRewards();
 						for(int j=0; j<eventReward.size();j++) {
@@ -153,10 +171,10 @@ public class EventService {
 					winner.put(key, count);
 				}
 								
-				LinkedHashMap<String, Integer> probwinner = new LinkedHashMap<String,Integer>();
+				LinkedHashMap<String, Double> probwinner = new LinkedHashMap<String,Double>();
 				int totalwinner = 0;
 				for(String key:keys) {
-					int probcount = findEventSetup.getRewardInfo().get(key) - winner.get(key);
+					Double probcount = findEventSetup.getRewardInfo().get(key) - winner.get(key);
 					probwinner.put(key, probcount);
 					totalwinner += probcount;
 				}
@@ -205,11 +223,34 @@ public class EventService {
 					}
 				}
 			} else {
-
 				eventOutputDto.setResponseMessage("신청 가능 건수를 초과하였습니다.");
 				return eventOutputDto;
 			}
-		} else {
+		}
+		//확률형 랜덤인 경우
+		else if(RewardType.RANDOMPROB.equals(findEventSetup.getRewardType())) {
+					
+			Set<String> keys = findEventSetup.getRewardInfo().keySet();
+			
+			LinkedHashMap<String, Double> probwinner = new LinkedHashMap<String,Double>();
+			Double totalprob = 0.0;
+			
+			for(String key : keys) {
+				totalprob += findEventSetup.getRewardInfo().get(key);
+				probwinner.put(key,totalprob);
+			}			
+			
+			Random rand = new Random();
+			Double dValue = rand.nextDouble()%totalprob;
+			
+			for(String key : keys) {
+				if(dValue <= probwinner.get(key)) {
+					inputHistory.setRewardName(key);
+					break;
+				}
+			}	
+		}		
+		else if(RewardType.DEFAULT.equals(findEventSetup.getRewardType())){
 			inputHistory.setRewardName("DEFAULT");
 		}
 
@@ -218,6 +259,7 @@ public class EventService {
 		int length = event.historyLogLength() + 1;
 		System.out.println(length);
 		inputHistory.setOrderCount(length);
+		
 		// System.out.println(event);
 
 		// System.out.println(findEventSetup);
@@ -237,6 +279,11 @@ public class EventService {
 		}
 		eventOutputDto.setResponseMessage("정상등록 되었음");
 		eventOutputDto.setResultStatus("Y");
+		int eventOrderCount = 0;
+		for(int i=0; i<findEventId.length;i++) {
+			eventOrderCount += findEventId[i].getTotalOrderCount();
+		}
+		eventOutputDto.setEventOrderCount(eventOrderCount+1);
 
 		return eventOutputDto;
 	}

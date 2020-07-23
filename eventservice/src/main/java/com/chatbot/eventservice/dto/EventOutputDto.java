@@ -23,7 +23,7 @@ public class EventOutputDto {
 	private int orderCount;
 	
 	private int eventOrderCount;
-	private int dDateCount;
+	private Long dDateCount;
 	
 	private Map<String,String> resultInfo = new HashMap<String,String>();
 	
