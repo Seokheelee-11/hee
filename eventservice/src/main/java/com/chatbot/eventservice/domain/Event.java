@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
 
-@Document("EVENT")
+//@Document("EVENT")
 @Data
 public class Event {
 	@Id
@@ -57,7 +57,6 @@ public class Event {
 		}
 		return returnString;
 	}
-
 	
 	@Data	
 	public static class History{
@@ -71,6 +70,4 @@ public class Event {
 		}
 
 	}	
-	
-
 }

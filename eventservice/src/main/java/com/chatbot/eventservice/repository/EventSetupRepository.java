@@ -6,8 +6,6 @@ import com.chatbot.eventservice.domain.EventSetup;
 
 public interface EventSetupRepository extends MongoRepository<EventSetup,String>{
 	
-	public EventSetup findByEventId(String eventId);
+	public EventSetup findOneByEventId(String eventId);
 
-	
-	
 }

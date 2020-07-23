@@ -62,7 +62,7 @@ public class EventService {
 		}
 
 		// EventSetup값 DB에서 불러오기
-		EventSetup findEventSetup = eventSetupRepository.findByEventId(event.getEventId());
+		EventSetup findEventSetup = eventSetupRepository.findOneByEventId(event.getEventId());
 
 		// EventSetup된 것이 없으면 return
 		if (findEventSetup == null) {
@@ -228,6 +228,7 @@ public class EventService {
 			}
 		}
 		//확률형 랜덤인 경우
+		// 라이브러리 가져와서 쓰는거 한번 검색해보기
 		else if(RewardType.RANDOMPROB.equals(findEventSetup.getRewardType())) {
 					
 			Set<String> keys = findEventSetup.getRewardInfo().keySet();

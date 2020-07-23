@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
 
-@Document("EVENTMANAGE")
+//@Document("EVENTMANAGE")
 @Data
 public class EventSetup {
 	@Id
@@ -31,6 +31,7 @@ public class EventSetup {
 	private List<String> nonTargetClnn;
 	
 	private int totalCount; // 추첨, 선착순 신청 가능 건수 
+	//enum이나 ,변하지 않는 string 형태(define)로 바뀌면 좋을 듯 
 	private String closingStatus;
 	
 
@@ -42,6 +43,8 @@ public class EventSetup {
 		nonTargetClnn = new ArrayList<String>();
 	}
 	
+	//DateType 보다는 중복주기가 어떰?
+	// 1분/1시간 뿐만 아니라, 값을 하나 더 받아와서 3시간 단위 1주일 단위 등을 추가
 	public enum DateType{
 		DEFAULT,
 		ALL,
@@ -57,7 +60,7 @@ public class EventSetup {
 		FCFS,
 		RANDOM,
 		RANDOMPROB, // 랜덤 확률
-		QUIZ // QUIZ는 여기 있으면 안됨 나중에 수정할 수 있도록
+		//QUIZ // QUIZ는 여기 있으면 안됨 나중에 수정할 수 있도록
 	}
 }
 
