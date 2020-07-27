@@ -60,7 +60,7 @@ public class EventSetup {
 		FCFS,
 		RANDOM,
 		RANDOMPROB, // 랜덤 확률
-		//QUIZ // QUIZ는 여기 있으면 안됨 나중에 수정할 수 있도록
+		//QUIZ // gQUIZ는 여기 있으면 안됨 나중에 수정할 수 있도록
 	}
 }
 
