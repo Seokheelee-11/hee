@@ -1,0 +1,8 @@
+spring:
+  data:
+    mongodb:
+      host: 34.64.182.183 
+      port: 27017
+      database: chatbot-3
+      username: chatbotAdmin
+      password: bot123!

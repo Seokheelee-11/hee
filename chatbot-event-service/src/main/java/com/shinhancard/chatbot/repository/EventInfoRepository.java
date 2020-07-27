@@ -1,0 +1,10 @@
+package com.shinhancard.chatbot.repository;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+import com.shinhancard.chatbot.domain.EventInfo;
+
+public interface EventInfoRepository extends MongoRepository<EventInfo, String>{
+	
+	EventInfo findOneById(String id);
+}
