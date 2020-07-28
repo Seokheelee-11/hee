@@ -111,7 +111,7 @@ public class EventSetupService {
 
 
 		if (eventSetup.getEventId() == null) {
-			eventSetupOutputDto.setResponseMessage("eventId를 입력해주세요");
+			eventSetupOutpggutDto.setResponseMessage("eventId를 입력해주세요");
 			return eventSetupOutputDto;
 		}
 		System.out.println("시작날짜, 종료날짜 입력 체크");

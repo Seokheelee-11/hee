@@ -7,4 +7,5 @@ import com.shinhancard.chatbot.domain.EventInfo;
 public interface EventInfoRepository extends MongoRepository<EventInfo, String>{
 	
 	EventInfo findOneById(String id);
+	EventInfo findOneByEventId(String EventId);
 }

@@ -76,12 +76,12 @@ public class EventService {
 		
 		HistoryLog log = new HistoryLog();
 		//FCFS, RANDOM 의 경
-		if (eventInfo.isFCFS() && eventInfo.isRandom()) {
+		if (eventInfo.isRewardFCFS() && eventInfo.isRewardRandom()) {
 			//TODO :: event 신청하는 함수 실행 
 			//log = 
 		}
 		
-		else if (eventInfo.isRandomProb()) {
+		else if (eventInfo.isRewardRandomProb()) {
 			//TODO :: event 신청하는 함수 실행 
 			//log = 
 		}

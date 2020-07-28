@@ -18,10 +18,12 @@ public class EventSetup {
 	public String id;
 	
 	private String eventId;
-	private LocalDateTime startDate;
-	private LocalDateTime endDate;
+	
+	private LocalDateTime startDt;
+	private LocalDateTime endDt;
 	private LocalDateTime date;
-	private DateType dateType; //이벤트 명 중복 date 관리(ALL - 중복 조건 없음, MIN - 분단위, HOURS - 시간 단위, DAY - 일 단위 ~~ 중복 허용)
+	
+	private DateType overLapDateType; //이벤트 명 중복 date 관리(ALL - 중복 조건 없음, MIN - 분단위, HOURS - 시간 단위, DAY - 일 단위 ~~ 중복 허용)
 	private RewardType rewardType;
 	
 	private LinkedHashMap<String, Double> rewardInfo = new LinkedHashMap<>();
