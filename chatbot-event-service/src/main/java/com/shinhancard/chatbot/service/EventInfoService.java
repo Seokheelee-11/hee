@@ -2,7 +2,6 @@ package com.shinhancard.chatbot.service;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.SuccessCallback;
 
 import com.shinhancard.chatbot.domain.EventInfo;
 import com.shinhancard.chatbot.domain.EventInfo.EventInfoResultCode;
@@ -20,6 +19,23 @@ public class EventInfoService {
 
 	public EventInfo getEventById(String id) {
 		return eventInfoRepository.findOneById(id);
+	}
+	
+	public EventInfo updateEvent(String id, EventInfo event) {
+		EventInfo savedEvent = eventInfoRepository.findOneById(event.getId());
+		savedEvent.update(event);
+
+		// 사실 데이터를 조회 > 수정 하게 되면 JPA에서는 '영속성 관리' 라는 것을 해주기 때문에 save를 따로 해줄필요가 없지만..
+		// 그냥 명시적으로 save 추가해 주었음
+		return eventInfoRepository.save(savedEvent);
+	}
+
+	public void deleteEvent(String id) {
+		eventInfoRepository.deleteById(id);
+	}
+
+	public void joinEvent(String eventId) {
+
 	}
 
 	public EventInfoOutput registEvent(EventInfoInput eventInfoInput) {
@@ -72,20 +88,5 @@ public class EventInfoService {
 		return result;
 	}
 
-	public EventInfo updateEvent(String id, EventInfo event) {
-		EventInfo savedEvent = eventInfoRepository.findOneById(event.getId());
-		savedEvent.update(event);
 
-		// 사실 데이터를 조회 > 수정 하게 되면 JPA에서는 '영속성 관리' 라는 것을 해주기 때문에 save를 따로 해줄필요가 없지만..
-		// 그냥 명시적으로 save 추가해 주었음
-		return eventInfoRepository.save(savedEvent);
-	}
-
-	public void deleteEvent(String id) {
-		eventInfoRepository.deleteById(id);
-	}
-
-	public void joinEvent(String eventId) {
-
-	}
 }

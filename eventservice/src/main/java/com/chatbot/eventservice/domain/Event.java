@@ -18,51 +18,51 @@ public class Event {
 	private String eventId;
 	private String clnn;
 	
-	private int totalOrderCount; // 인벤트명 중복 허용시 한 고객이 신청한 횟수
-	private LocalDateTime lastModDate;
+	private int orderCount; // 인벤트명 중복 허용시 한 고객이 신청한 횟수
+	private LocalDateTime lastModDt;
 	
-	private List<History> historyLog;
+	private List<History> logs;
 
 	public Event() {
-		this.totalOrderCount = 0;
-		this.historyLog = new ArrayList<History>();
+		this.orderCount = 0;
+		this.logs = new ArrayList<History>();
 		
 	}
 	
 	public void historyLogAdd(History inputHistory) {
-		this.historyLog.add(inputHistory);
+		this.logs.add(inputHistory);
 	}
 
 	public int historyLogLength() {
 		System.out.println("size 들어옴");
-		return this.historyLog.size();
+		return this.logs.size();
 	}
 	
 	public int getHistoryLogOrderCount() {
-			return this.historyLog.get(historyLog.size()-1).getOrderCount();
+			return this.logs.get(logs.size()-1).getOrderCount();
 	}
 	public List<String> getHistoryLogParam() {
-		return this.historyLog.get(historyLog.size()-1).getParam();
+		return this.logs.get(logs.size()-1).getParam();
 	}
 	
 	public History getHistoryEnd() {
-		return this.historyLog.get(historyLog.size()-1);
+		return this.logs.get(logs.size()-1);
 	}
 	
 	public List<String> getHistoryLogRewards(){
 		List<String> returnString = new ArrayList<String>();
 		
-		for(int i = 0; i< historyLog.size();i++) {
-			returnString.add(this.historyLog.get(i).rewardName);
+		for(int i = 0; i< logs.size();i++) {
+			returnString.add(this.logs.get(i).rewardName);
 		}
 		return returnString;
 	}
 	
 	@Data	
 	public static class History{
-		private int orderCount;
+		private int orderNumber;
 		private List<String> param;
-		private LocalDateTime date;
+		private LocalDateTime regDate;
 		private String rewardName;
 		
 		public History() {

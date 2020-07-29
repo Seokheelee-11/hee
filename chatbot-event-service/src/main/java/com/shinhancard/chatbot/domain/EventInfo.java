@@ -9,8 +9,6 @@ import java.util.Set;
 
 import org.springframework.data.annotation.Id;
 
-import com.shinhancard.chatbot.domain.EventInfo.EventInfoResultCode;
-
 import lombok.Data;
 
 @Data
@@ -182,7 +180,8 @@ public class EventInfo {
 	}
 
 	public enum EventInfoResultCode {
-		SUCCESS("00", "성공적으로 저장되었습니다."), FAILED_NO_EVENTID_INPUT("01", "eventId를 입력해주세요."),
+		SUCCESS("00", "성공적으로 저장되었습니다."),
+		FAILED_NO_EVENTID_INPUT("01", "eventId를 입력해주세요."),
 		FAILED_NO_DATE_INPUT("02", "StartDt, EndDt를 입력해주세요 입력 형식은 YYYY-MM-DDT hh:mm:ss 입니다."),
 		FAILED_DATE_ORDER("03", "StartDate가 EndDate보다 느립니다."),
 		FAILED_NO_OVERLAP_INPUT("04", "overLapDateCount 및 includeDateTF를 입력해 주세요"),
