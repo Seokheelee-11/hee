@@ -3,7 +3,7 @@ package com.shinhancard.chatbot.service;
 import org.springframework.stereotype.Service;
 
 import com.shinhancard.chatbot.controller.request.EventRequest;
-import com.shinhancard.chatbot.controller.result.EventResult;
+import com.shinhancard.chatbot.controller.response.EventResult;
 import com.shinhancard.chatbot.domain.EventHistory;
 import com.shinhancard.chatbot.domain.EventInfo;
 import com.shinhancard.chatbot.domain.HistoryLog;
@@ -88,7 +88,7 @@ public class EventService {
 		
 		//TODO :: 모든 케이스문 통과 후 eventHistory update
 		eventHistory.addLog(log);
-		eventHistory.updateOrderCount(0);
+		eventHistory.updateLastOrder(0);
 		
 		return eventHistory;
 	}

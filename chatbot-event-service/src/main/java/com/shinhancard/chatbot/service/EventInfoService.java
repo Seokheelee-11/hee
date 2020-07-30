@@ -3,10 +3,10 @@ package com.shinhancard.chatbot.service;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import com.shinhancard.chatbot.controller.request.EventInfoRequest;
+import com.shinhancard.chatbot.controller.response.EventInfoResponse;
 import com.shinhancard.chatbot.domain.EventInfo;
-import com.shinhancard.chatbot.domain.EventInfo.EventInfoResultCode;
-import com.shinhancard.chatbot.dto.EventInfoInput;
-import com.shinhancard.chatbot.dto.EventInfoOutput;
+import com.shinhancard.chatbot.domain.EventResultCode;
 import com.shinhancard.chatbot.repository.EventInfoRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -38,12 +38,12 @@ public class EventInfoService {
 
 	}
 
-	public EventInfoOutput registEvent(EventInfoInput eventInfoInput) {
+	public EventInfoResponse registEvent(EventInfoRequest eventInfoRequest) {
 		ModelMapper modelMapper = new ModelMapper();
-		EventInfo eventInfo = modelMapper.map(eventInfoInput, EventInfo.class);
-		EventInfoOutput eventInfoOutput = modelMapper.map(eventInfo, EventInfoOutput.class);
+		EventInfo eventInfo = modelMapper.map(eventInfoRequest, EventInfo.class);
+		EventInfoResponse eventInfoResponse = modelMapper.map(eventInfo, EventInfoResponse.class);
 
-		EventInfoResultCode eventInfoResultCode;
+		EventResultCode.ResultCode eventInfoResultCode;
 
 		// validation 체크
 		eventInfoResultCode = getValidationEventInfo(eventInfo);
@@ -52,38 +52,26 @@ public class EventInfoService {
 		if(eventInfoResultCode.isSuccess()) {
 			eventInfoRepository.save(eventInfo);
 		}
-		
-		eventInfoOutput.setResult(eventInfoResultCode);
+		//Response의 resultCode 채움
+		eventInfoResponse.setResult(eventInfoResultCode);
 	
-		return eventInfoOutput;
+		return eventInfoResponse;
 	}
 	
 
-	public EventInfoResultCode getValidationEventInfo(EventInfo eventInfo) {
-		EventInfoResultCode result = EventInfoResultCode.SUCCESS;
-		// EventId가 입력되었는지?
-		result = eventInfo.getValidationEventId(result);
-		// DateFormat이 정상적으로 입력되었는지?
-		result = eventInfo.getValidationDateFormat(result);
-		// startDate < EndDate인지?
-		result = eventInfo.getValidationDate(result);
-		// OverLap이 가능할때 input 값이 제대로 됨?
-		result = eventInfo.getValidationOverLapInput(result);
-		// randomprob의 값이 1을 넘었는지?
-		result = eventInfo.getValidationRandomProbOver(result);
-		// rewardInfo 입력이 되었는지?
-		result = eventInfo.getValidationRewardInfoInput(result);
-		// QuizAnswer 입력이 되었는지?
-		result = eventInfo.getValidationQuizAnswerInput(result);
+	public EventResultCode.ResultCode getValidationEventInfo(EventInfo eventInfo) {
+		EventResultCode.ResultCode result = EventResultCode.ResultCode.SUCCESS;
+		//default validation check
+		result = eventInfo.getDefaultValidation(result);
 		// evendId가 중복되었는지?
 		result = getValidationEventIdOverLap(eventInfo, result);
 		return result;
 	}
 
-	public EventInfoResultCode getValidationEventIdOverLap(EventInfo eventInfo, EventInfoResultCode result) {
+	public EventResultCode.ResultCode getValidationEventIdOverLap(EventInfo eventInfo, EventResultCode.ResultCode result) {
 		EventInfo findEvent = eventInfoRepository.findOneByEventId(eventInfo.getEventId());
 		if (findEvent != null) {
-			result = EventInfoResultCode.FAILED_EVENTID_OVERLAP;
+			result = EventResultCode.ResultCode.FAILED_EVENTID_OVERLAP;
 		}
 		return result;
 	}

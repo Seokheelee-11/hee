@@ -1,4 +1,4 @@
-package com.shinhancard.chatbot.controller.result;
+package com.shinhancard.chatbot.controller.response;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

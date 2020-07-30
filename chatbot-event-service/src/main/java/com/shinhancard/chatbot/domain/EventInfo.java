@@ -23,17 +23,25 @@ public class EventInfo {
 	private LocalDateTime startDt;
 	private LocalDateTime endDt;
 
-	private DateType overLapDateType;
-	private int overLapDateCount;
+	//중복 신청 관련 field
+	private Boolean overLapTF;
+	private OverLapType overLapDateType;
+	private Integer overLapDateCount;
 	private Boolean includeDateTF;
 
+	//limit 관련 field
+	private Boolean rewardTf;
 	private RewardType rewardType;
 	private LinkedHashMap<String, Double> rewardInfo = new LinkedHashMap<>();
-	private HashMap<String, HashMap<String, String>> resultInfo = new HashMap<>();
-
+	
+	//quiz 신청 관련 field
 	private Boolean quizTF;
 	private String quizAnswer;
 
+	//결과 field
+	private HashMap<String, HashMap<String, String>> resultInfo = new HashMap<>();
+	
+	//대상자 선정
 	private List<String> targetClnn;
 	private List<String> nonTargetClnn;
 
@@ -44,9 +52,6 @@ public class EventInfo {
 	}
 
 	public EventInfo() {
-		this.overLapDateType = DateType.ONCE;
-		this.rewardType = RewardType.DEFAULT;
-		this.quizTF = false;
 		targetClnn = new ArrayList<String>();
 		nonTargetClnn = new ArrayList<String>();
 	}
@@ -63,59 +68,71 @@ public class EventInfo {
 		return false;
 	}
 
-	public EventInfoResultCode getValidationRandomProbOver(EventInfoResultCode result) {
-		if (this.isRewardRandomProb()) {
-			if (this.getTotalProb() > 1) {
-				result = EventInfoResultCode.FAILED_RANDOMPROB_OVER_ONE;
+	public EventResultCode.ResultCode getDefaultValidation(EventResultCode.ResultCode result){	
+		// EventId가 입력되었는지?
+		result = this.getValidationEventId(result);
+		// Date 입력이 정상적으로 입력되었는지?
+		result = this.getValidationDateInput(result);
+		// OverLap 입력이 정상적으로 되었는지?
+		result = this.getValidationOverLapInput(result);
+		// rewardInfo 입력이 정상적으로 되었는지?
+		result = this.getValidationRewardInput(result);
+		// QuizAnswer 입력이 정상적으로 되었는지?
+		result = this.getValidationQuizAnswerInput(result);
+
+		return result;
+	}
+	
+	public EventResultCode.ResultCode getValidationRewardInput(EventResultCode.ResultCode result) {
+		if (this.rewardTf) {
+			if (this.rewardType == null || this.rewardInfo.isEmpty()) {
+				result = EventResultCode.ResultCode.FAILED_NO_LIMIT_INPUT;
+			}
+			// randomprob의 값이 1을 넘었는지?
+			if(RewardType.RANDOMPROB.equals(this.rewardType)) {
+				if (this.getTotalProb() > 1) {
+					result = EventResultCode.ResultCode.FAILED_RANDOMPROB_OVER_ONE;
+				}
+			}
+		}
+		return result;
+	}
+	
+
+	public EventResultCode.ResultCode getValidationOverLapInput(EventResultCode.ResultCode result) {
+		if (this.overLapTF) {
+			if (this.overLapDateType == null
+				||this.overLapDateCount == null
+				||this.includeDateTF == null) {
+				result = EventResultCode.ResultCode.FAILED_NO_OVERLAP_INPUT;
 			}
 		}
 		return result;
 	}
 
-	public EventInfoResultCode getValidationOverLapInput(EventInfoResultCode result) {
-		if (!this.isOverLapDateOnce()) {
-			if (this.overLapDateCount < 1 || this.includeDateTF == null) {
-				result = EventInfoResultCode.FAILED_NO_OVERLAP_INPUT;
-			}
-		}
-		return result;
-	}
 
-	public EventInfoResultCode getValidationRewardInfoInput(EventInfoResultCode result) {
-		if (!this.isRewardDefault()) {
-			if (this.rewardInfo.isEmpty()) {
-				result = EventInfoResultCode.FAILED_NO_REWARDINFO_INPUT;
-			}
-		}
-		return result;
-	}
-
-	public EventInfoResultCode getValidationQuizAnswerInput(EventInfoResultCode result) {
+	public EventResultCode.ResultCode getValidationQuizAnswerInput(EventResultCode.ResultCode result) {
 		if (this.quizTF) {
 			if (this.quizAnswer.isEmpty()) {
-				result = EventInfoResultCode.FAILED_NO_QUIZANSWER_INPUT;
+				result = EventResultCode.ResultCode.FAILED_NO_QUIZANSWER_INPUT;
 			}
 		}
 		return result;
 	}
 
-	public EventInfoResultCode getValidationEventId(EventInfoResultCode result) {
-		if (this.getEventId() == null) {
-			result = EventInfoResultCode.FAILED_NO_EVENTID_INPUT;
+	public EventResultCode.ResultCode getValidationEventId(EventResultCode.ResultCode result) {
+		if(this.eventId.isEmpty()) {
+			result = EventResultCode.ResultCode.FAILED_NO_EVENTID_INPUT;
 		}
 		return result;
 	}
 
-	public EventInfoResultCode getValidationDateFormat(EventInfoResultCode result) {
+	public EventResultCode.ResultCode getValidationDateInput(EventResultCode.ResultCode result) {
 		if (this.getStartDt() == null || this.getEndDt() == null) {
-			result = EventInfoResultCode.FAILED_NO_DATE_INPUT;
+			result = EventResultCode.ResultCode.FAILED_NO_DATE_INPUT;
 		}
-		return result;
-	}
-
-	public EventInfoResultCode getValidationDate(EventInfoResultCode result) {
-		if (this.getStartDt().isAfter(this.getEndDt())) {
-			result = EventInfoResultCode.FAILED_DATE_ORDER;
+		else if (this.getStartDt().isAfter(this.getEndDt())) {
+			result = EventResultCode.ResultCode.FAILED_DATE_ORDER;
 		}
 		return result;
 	}
@@ -131,20 +148,7 @@ public class EventInfo {
 		return totalProb;
 	}
 
-	public boolean isOverLapDateOnce() {
-		if (this.overLapDateType == DateType.ONCE) {
-			return true;
-		}
-		return false;
-	}
 
-	public boolean isRewardDefault() {
-		if (this.rewardType == RewardType.DEFAULT) {
-			return true;
-		}
-
-		return false;
-	}
 
 	public boolean isRewardRandom() {
 		if (this.rewardType == RewardType.RANDOM) {
@@ -171,47 +175,12 @@ public class EventInfo {
 	}
 
 	public enum RewardType {
-		DEFAULT, FCFS, RANDOM, RANDOMPROB; // 랜덤 확률
+		FCFS, RANDOM, RANDOMPROB; // 랜덤 확률
 		// QUIZ // QUIZ는 여기 있으면 안됨 나중에 수정할 수 있도록
 	}
 
-	public enum DateType {
-		ONCE, ALLTIME, MINUTE, HOUR, DAY, MONTH, YEAR;
-	}
-
-	public enum EventInfoResultCode {
-		SUCCESS("00", "성공적으로 저장되었습니다."),
-		FAILED_NO_EVENTID_INPUT("01", "eventId를 입력해주세요."),
-		FAILED_NO_DATE_INPUT("02", "StartDt, EndDt를 입력해주세요 입력 형식은 YYYY-MM-DDT hh:mm:ss 입니다."),
-		FAILED_DATE_ORDER("03", "StartDate가 EndDate보다 느립니다."),
-		FAILED_NO_OVERLAP_INPUT("04", "overLapDateCount 및 includeDateTF를 입력해 주세요"),
-		FAILED_NO_REWARDINFO_INPUT("05", "rewardInfo를 입력해 주세요"),
-		FAILED_NO_QUIZANSWER_INPUT("06", "quizAnswer를 입력해 주세요"), FAILED_EVENTID_OVERLAP("07", "이미 등록된 EventID입니다."),
-		FAILED_RANDOMPROB_OVER_ONE("08", "RANDOM 확률의 총 합은 1을 넘을 수 없습니다.");
-
-		private String resultCode;
-		private String resultMessage;
-
-		private EventInfoResultCode(String resultCode, String resultMessage) {
-			this.resultCode = resultCode;
-			this.resultMessage = resultMessage;
-		}
-
-		public String getResultCode() {
-			return resultCode;
-		}
-
-		public String getResultMessage() {
-			return resultMessage;
-		}
-
-		public Boolean isSuccess() {
-			if (this.equals(SUCCESS)) {
-				return true;
-			} else {
-				return false;
-			}
-		}
+	public enum OverLapType {
+		ALLTIME, MINUTE, HOUR, DAY, MONTH, YEAR;
 	}
 
 }

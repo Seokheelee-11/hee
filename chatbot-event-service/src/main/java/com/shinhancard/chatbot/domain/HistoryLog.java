@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class HistoryLog {
 
-	private int orderNumber;
+	private Integer order;
 	private List<String> param;
 	private LocalDateTime regDate;
 	private String rewardName;

@@ -2,7 +2,6 @@ package com.shinhancard.chatbot.controller;
 
 import java.util.List;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shinhancard.chatbot.controller.request.EventInfoRequest;
+import com.shinhancard.chatbot.controller.response.EventInfoResponse;
 import com.shinhancard.chatbot.domain.EventInfo;
-import com.shinhancard.chatbot.dto.EventInfoInput;
-import com.shinhancard.chatbot.dto.EventInfoOutput;
 import com.shinhancard.chatbot.repository.EventInfoRepository;
 import com.shinhancard.chatbot.service.EventInfoService;
 
@@ -25,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EventInfoController {
 	
-	private final ModelMapper modelMapper;
 	private final EventInfoService eventInfoService;
 	private final EventInfoRepository eventInfoRepository;
 
@@ -40,8 +38,8 @@ public class EventInfoController {
 	}
 	
 	@PostMapping
-	public EventInfoOutput registEvent(@RequestBody EventInfoInput eventInfoInput) {
-		return eventInfoService.registEvent(eventInfoInput);
+	public EventInfoResponse registEvent(@RequestBody EventInfoRequest eventInfoRequest) {
+		return eventInfoService.registEvent(eventInfoRequest);
 	}
 	
 	@PutMapping("{id}")

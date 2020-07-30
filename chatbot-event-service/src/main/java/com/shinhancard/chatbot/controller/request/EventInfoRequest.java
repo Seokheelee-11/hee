@@ -1,4 +1,4 @@
-package com.shinhancard.chatbot.dto;
+package com.shinhancard.chatbot.controller.request;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -6,15 +6,13 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
-
-import com.shinhancard.chatbot.domain.EventInfo.DateType;
 import com.shinhancard.chatbot.domain.EventInfo.RewardType;
+import com.shinhancard.chatbot.domain.EventInfo.OverLapType;
 
 import lombok.Data;
 
 @Data
-public class EventInfoInput {
+public class EventInfoRequest {
 	
 	private String eventId;	
 	private String displayName;
@@ -22,26 +20,29 @@ public class EventInfoInput {
 	private LocalDateTime startDt;
 	private LocalDateTime endDt;
 	
-	private DateType overLapDateType;
-	private int overLapDateCount;
+	//중복 신청 관련 field
+	private Boolean overLapTF;
+	private OverLapType overLapDateType;
+	private Integer overLapDateCount;
 	private Boolean includeDateTF;
 	
-	private RewardType  rewardType;
+	//limit 관련 field
+	private Boolean rewardTf;
+	private RewardType rewardType;
 	private LinkedHashMap<String, Double> rewardInfo = new LinkedHashMap<>();
-	private HashMap<String,HashMap<String,String>> resultInfo = new HashMap<>();
 	
+	//quiz 신청 관련 field
 	private Boolean quizTF;
 	private String quizAnswer;
 	
+	//결과 field
+	private HashMap<String,HashMap<String,String>> resultInfo = new HashMap<>();
+		
+	//대상자 선정
 	private List<String> targetClnn;
 	private List<String> nonTargetClnn;
 	
-
-	
-	public EventInfoInput() {
-		this.overLapDateType=DateType.ONCE;
-		this.rewardType = RewardType.DEFAULT;
-		this.quizTF=false;
+	public EventInfoRequest() {
 		targetClnn = new ArrayList<String>();
 		nonTargetClnn = new ArrayList<String>();
 	}
