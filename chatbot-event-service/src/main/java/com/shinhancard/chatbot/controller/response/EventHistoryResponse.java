@@ -19,14 +19,14 @@ public class EventHistoryResponse {
 	//request 기본 입력값
 	private String eventId;
 	private String clnn;
+	private String displayName;
+
+	private Integer lastOrder;
+	private LocalDateTime lastModDt;
+	
 	private List<String> param;
-	
-	private LocalDateTime date;
-	
-	//limit 신청시 신청 결과
 	private String rewardName;
-	private Integer order;
-	
+
 	private Integer eventAppliedOrder;
 	private Integer dDateCount;
 	

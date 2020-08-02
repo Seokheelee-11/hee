@@ -6,7 +6,7 @@ import com.shinhancard.chatbot.controller.request.EventRequest;
 import com.shinhancard.chatbot.controller.response.EventResult;
 import com.shinhancard.chatbot.domain.EventHistory;
 import com.shinhancard.chatbot.domain.EventInfo;
-import com.shinhancard.chatbot.domain.HistoryLog;
+import com.shinhancard.chatbot.domain.EventHistoryLog;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +74,7 @@ public class EventService {
 	
 	public EventHistory executeEvent(EventInfo eventInfo, EventHistory eventHistory) {
 		
-		HistoryLog log = new HistoryLog();
+		EventHistoryLog log = new EventHistoryLog();
 		//FCFS, RANDOM 의 경
 		if (eventInfo.isRewardFCFS() && eventInfo.isRewardRandom()) {
 			//TODO :: event 신청하는 함수 실행 

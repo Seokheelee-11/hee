@@ -42,7 +42,7 @@ public class EventInfoService {
 		ModelMapper modelMapper = new ModelMapper();
 		EventInfo eventInfo = modelMapper.map(eventInfoRequest, EventInfo.class);
 		EventInfoResponse eventInfoResponse = modelMapper.map(eventInfo, EventInfoResponse.class);
-
+		//resultCode setting
 		EventResultCode.ResultCode eventInfoResultCode;
 
 		// validation 체크

@@ -1,10 +1,16 @@
 package com.shinhancard.chatbot.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import com.shinhancard.chatbot.controller.request.EventHistoryRequest;
+import com.shinhancard.chatbot.controller.response.EventHistoryResponse;
 import com.shinhancard.chatbot.domain.EventHistory;
-import com.shinhancard.chatbot.domain.EventHistory;
+import com.shinhancard.chatbot.domain.EventHistoryLog;
+import com.shinhancard.chatbot.domain.EventInfo;
+import com.shinhancard.chatbot.domain.EventResultCode;
 import com.shinhancard.chatbot.repository.EventHistoryRepository;
+import com.shinhancard.chatbot.repository.EventInfoRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EventHistoryService {
 	private final EventHistoryRepository eventHistoryRepository;
+	private final EventInfoRepository eventInfoRepository;
 	
 	public EventHistory getEventHistoryById(String id) {
 		return eventHistoryRepository.findOneById(id);
@@ -26,7 +33,7 @@ public class EventHistoryService {
 		return eventHistoryRepository.save(savedEvent);
 	}
 
-	public void deleteEvent(String id) {
+	public void deleteEventHistory(String id) {
 		eventHistoryRepository.deleteById(id);
 	}
 
@@ -40,4 +47,42 @@ public class EventHistoryService {
 		//TODO :: 조회 
 		return null;
 	}
+	
+	public EventHistoryResponse registEventHistory(EventHistoryRequest eventHistoryRequest) {
+		ModelMapper modelMapper = new ModelMapper();
+		EventHistory eventHistory = modelMapper.map(eventHistoryRequest, EventHistory.class);
+		EventHistoryResponse eventHistoryResponse = modelMapper.map(eventHistory, EventHistoryResponse.class);
+		EventHistoryLog eventHistoryLog = new EventHistoryLog();
+		EventResultCode.ResultCode eventHistoryResultCode = EventResultCode.ResultCode.SUCCESS;
+		
+		//기본 validation check
+		eventHistoryResultCode = eventHistory.getValidationEventHistory(eventHistoryResultCode);
+		
+		EventInfo findEventInfo = eventInfoRepository.findOneByEventId(eventHistory.getEventId());
+		//findEventInfo Validation
+		eventHistoryResultCode = getEventInfoValidation(eventHistoryResultCode,findEventInfo);
+		
+		//applyDate Validation
+		if(eventHistoryResultCode.equals(EventResultCode.ResultCode.SUCCESS)) {
+			eventHistoryResultCode = findEventInfo.getEventDateValidate(eventHistoryResultCode, eventHistoryLog.getRegDate());
+		}
+		
+		EventHistory findEventIdAndClnn = eventHistoryRepository
+										.findOneByEventIdAndClnn
+										(eventHistory.getEventId(), eventHistory.getClnn());
+		
+		
+		
+		return eventHistoryResponse;		
+	}
+	
+	public EventResultCode.ResultCode getEventInfoValidation(EventResultCode.ResultCode result, EventInfo findEventInfo) {
+		if (findEventInfo == null) {
+			result = EventResultCode.ResultCode.FAILED_CANT_FIND_EVENTID;
+		}
+		return result;
+	}
+	
+
+
 }

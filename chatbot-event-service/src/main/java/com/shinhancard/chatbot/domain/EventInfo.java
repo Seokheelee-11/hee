@@ -147,6 +147,12 @@ public class EventInfo {
 		}
 		return totalProb;
 	}
+	public EventResultCode.ResultCode getEventDateValidate(EventResultCode.ResultCode result, LocalDateTime date) {
+		if (this.startDt.isBefore(date) || this.endDt.isAfter(date)) {
+			result = EventResultCode.ResultCode.FAILED_NO_APPLY_DATE;
+		}
+		return result;
+	}
 
 
 

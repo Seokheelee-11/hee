@@ -10,4 +10,5 @@ public interface EventHistoryRepository extends MongoRepository<EventHistory, St
 	
 	EventHistory findOneById(String id);
 	List<EventHistory> findAllByEventId(String eventId);
+	EventHistory findOneByEventIdAndClnn(String eventId, String clnn);
 }

@@ -7,14 +7,16 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class HistoryLog {
+public class EventHistoryLog {
 
 	private Integer order;
 	private List<String> param;
 	private LocalDateTime regDate;
 	private String rewardName;
 	
-	public HistoryLog() {
+	public EventHistoryLog() {
 		param = new ArrayList<String>();
+		rewardName = "default";
+		regDate = LocalDateTime.now();
 	}
 }

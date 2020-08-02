@@ -14,18 +14,19 @@ public class EventHistory {
 	
 	private String eventId;
 	private String clnn;
+	private String displayName;
 	
 	private Integer lastOrder;
-	private List<HistoryLog> logs; 
+	private List<EventHistoryLog> logs; 
 	//TODO :: 최소한의 필드만 넣어놨으니 더 추가할 것 
 	
 	private LocalDateTime lastModDt;
 	
-	public void addLog(HistoryLog log) {
+	public void addLog(EventHistoryLog log) {
 		this.logs.add(log);
 	}
 	
-	public void update(EventInfo newEvent) {
+	public void update(EventHistory newEvent) {
 		this.eventId = newEvent.getEventId();
 		this.displayName = newEvent.getDisplayName();
 
@@ -34,4 +35,20 @@ public class EventHistory {
 		this.lastOrder = count;
 		this.lastModDt = LocalDateTime.now();
 	}
+	
+	public EventResultCode.ResultCode getValidationEventHistory(EventResultCode.ResultCode result) {
+		// EventId가 입력되었는지?
+		if(this.eventId.isEmpty()) {
+			result = EventResultCode.ResultCode.FAILED_NO_EVENTID_INPUT;
+		}
+		// Clnn이 입력되었는지?
+		else if(this.clnn.isEmpty()) {
+			result = EventResultCode.ResultCode.FAILED_NO_CLNN_INPUT;
+		}
+		return result;
+	}
+	
+	
+	
+
 }
