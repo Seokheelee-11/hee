@@ -62,7 +62,7 @@ public class EventInfoService {
 			eventInfoResultCode = ResultCode.FAILED_NO_OVERLAP_INPUT;
 		}
 		// rewardInfo 입력이 정상적으로 되었는지?
-		if (eventInfo.getRewardTf()) {
+		if (eventInfo.getRewardTF()) {
 			// default로 입력해야 할 값이 정상적으로 입력되었는가?
 			if (!eventInfo.getValidationRewardDefaultInput()) {
 				eventInfoResultCode = ResultCode.FAILED_NO_LIMIT_INPUT;

@@ -27,7 +27,7 @@ public class EventInfoRequest {
 	private Boolean includeDateTF;
 	
 	//limit 관련 field
-	private Boolean rewardTf;
+	private Boolean rewardTF;
 	private RewardType rewardType;
 	private LinkedHashMap<String, Double> rewardInfo = new LinkedHashMap<>();
 	

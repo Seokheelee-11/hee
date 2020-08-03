@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import lombok.Data;
 
@@ -30,13 +33,13 @@ public class EventInfo {
 	private Boolean includeDateTF;
 
 	// limit 관련 field
-	private Boolean rewardTf;
+	private Boolean rewardTF;
 	private RewardType rewardType;
 	private LinkedHashMap<String, Double> rewardInfo = new LinkedHashMap<>();
 
 	// quiz 신청 관련 field
 	private Boolean quizTF;
-	private String quizAnswer;
+	private List<String> quizAnswer;
 
 	// 결과 field
 	private HashMap<String, HashMap<String, String>> resultInfo = new HashMap<>();
@@ -54,6 +57,7 @@ public class EventInfo {
 	public EventInfo() {
 		targetClnn = new ArrayList<String>();
 		nonTargetClnn = new ArrayList<String>();
+		quizAnswer = new ArrayList<String>();
 	}
 
 	// TODO :: 최소한의 필드만 넣어놨으니 더 추가할 것
@@ -78,7 +82,7 @@ public class EventInfo {
 	}
 
 	public Boolean getValidationRewardDefaultInput() {
-		if (this.rewardType == null || this.rewardInfo.isEmpty()) {
+		if (this.rewardType == null || CollectionUtils.isEmpty(this.rewardInfo)) {
 			return false;
 		}
 		return true;
@@ -103,14 +107,14 @@ public class EventInfo {
 	}
 
 	public Boolean getValidationQuizAnswerInput() {
-		if (this.quizAnswer.isEmpty()) {
+		if (CollectionUtils.isEmpty(this.quizAnswer)) {
 			return false;
 		}
 		return true;
 	}
 
 	public Boolean getValidationEventId() {
-		if (this.eventId.isEmpty()) {
+		if (StringUtils.isEmpty(this.eventId)) {
 			return false;
 		}
 		return true;
@@ -139,6 +143,16 @@ public class EventInfo {
 			totalProb += this.getRewardInfo().get(key);
 		}
 		return totalProb;
+	}
+	
+	public Integer getTotalCount() {
+		int result = 0;
+		Set<String> keys = this.rewardInfo.keySet();
+
+		for (String key : keys) {
+			result += rewardInfo.get(key);
+		}
+		return result;
 	}
 
 	public Boolean getEventDateValidate(LocalDateTime date) {
@@ -174,11 +188,49 @@ public class EventInfo {
 
 	public enum RewardType {
 		FCFS, RANDOM, RANDOMPROB; // 랜덤 확률
+		
 		// QUIZ // QUIZ는 여기 있으면 안됨 나중에 수정할 수 있도록
 	}
 
 	public enum OverLapType {
 		ALLTIME, MINUTE, HOUR, DAY, MONTH, YEAR;
+		
+		public Boolean isAllTime() {
+			if( this.equals(ALLTIME)) {
+				return true;
+			}
+			return false;
+		}
+		public Boolean isMinute() {
+			if( this.equals(MINUTE)) {
+				return true;
+			}
+			return false;
+		}
+		public Boolean isHour() {
+			if( this.equals(HOUR)) {
+				return true;
+			}
+			return false;
+		}
+		public Boolean isDay() {
+			if( this.equals(DAY)) {
+				return true;
+			}
+			return false;
+		}
+		public Boolean isMonth() {
+			if( this.equals(MONTH)) {
+				return true;
+			}
+			return false;
+		}
+		public Boolean isYear() {
+			if( this.equals(YEAR)) {
+				return true;
+			}
+			return false;
+		}
 	}
 
 }

@@ -36,7 +36,54 @@ public class EventHistory {
 		this.lastModDt = LocalDateTime.now();
 	}
 	
-
+	public Boolean canNoIncludeOverLap(EventInfo findEventInfo, EventHistoryLog eventHistoryLog) {
+		if(findEventInfo.getOverLapDateType().isMinute()
+			&& eventHistoryLog.getRegDate().isBefore(this.lastModDt.plusMinutes(findEventInfo.getOverLapDateCount()))) {
+			return false;
+		}
+		else if(findEventInfo.getOverLapDateType().isHour()
+				&& eventHistoryLog.getRegDate().isBefore(this.lastModDt.plusHours(findEventInfo.getOverLapDateCount()))) {
+				return false;
+			}
+		else if(findEventInfo.getOverLapDateType().isDay()
+				&& eventHistoryLog.getRegDate().isBefore(this.lastModDt.plusDays(findEventInfo.getOverLapDateCount()))) {
+				return false;
+			}
+		else if(findEventInfo.getOverLapDateType().isMonth()
+				&& eventHistoryLog.getRegDate().isBefore(this.lastModDt.plusMonths(findEventInfo.getOverLapDateCount()))) {
+				return false;
+			}
+		else if(findEventInfo.getOverLapDateType().isYear()
+				&& eventHistoryLog.getRegDate().isBefore(this.lastModDt.plusYears(findEventInfo.getOverLapDateCount()))) {
+				return false;
+			}
+		return true;
+	}
+	
+	public Boolean canIncludeOverLap(EventInfo findEventInfo, EventHistoryLog eventHistoryLog) {
+		if(findEventInfo.getOverLapDateType().isMinute()
+			&& eventHistoryLog.getRegDate().isBefore(this.lastModDt.plusMinutes(1))) {
+			return false;
+		}
+		else if(findEventInfo.getOverLapDateType().isHour()
+				&& eventHistoryLog.getRegDate().isBefore(this.lastModDt.plusHours(1))) {
+				return false;
+			}
+		else if(findEventInfo.getOverLapDateType().isDay()
+				&& eventHistoryLog.getRegDate().isBefore(this.lastModDt.plusDays(1))) {
+				return false;
+			}
+		else if(findEventInfo.getOverLapDateType().isMonth()
+				&& eventHistoryLog.getRegDate().isBefore(this.lastModDt.plusMonths(1))) {
+				return false;
+			}
+		else if(findEventInfo.getOverLapDateType().isYear()
+				&& eventHistoryLog.getRegDate().isBefore(this.lastModDt.plusYears(1))) {
+				return false;
+			}
+		return true;
+	}
+	
 
 	public Boolean getValidationEventIdInput() {
 		if(this.eventId.isEmpty()) {

@@ -15,7 +15,8 @@ public enum ResultCode {
 	FAILED_NO_APPLY_DATE("10", "이벤트 신청 기간이 아닙니다."),
 	FAILED_ALREADY_APPLIED("11", "이미 이벤트에 신청하셨습니다."),
 	FAILED_TIME_OVERLAP("12", "이벤트 신청이 불가합니다. 다음달(내일) 다시 신청해주세요"), 
-	FAILED_ORDERCOUNT_OVER("13", "이벤트에 신청 가능한 건수를 초과하였습니다.");
+	FAILED_ORDERCOUNT_OVER("13", "이벤트에 신청 가능한 건수를 초과하였습니다."),
+	FAILED_NO_CORRECT_ANSWER("14", "이벤트 정답이 아닙니다.");
 	
 	
 	private String resultCode;
