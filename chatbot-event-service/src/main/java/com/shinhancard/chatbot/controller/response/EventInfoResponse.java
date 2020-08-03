@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import com.shinhancard.chatbot.domain.EventInfo.RewardType;
 import com.shinhancard.chatbot.domain.EventInfo.OverLapType;
-import com.shinhancard.chatbot.domain.EventResultCode;
+import com.shinhancard.chatbot.domain.EventInfo.RewardType;
+import com.shinhancard.chatbot.domain.ResultCode;
 
 import lombok.Data;
 
@@ -46,7 +46,7 @@ public class EventInfoResponse {
 	private List<String> targetClnn;
 	private List<String> nonTargetClnn;
 
-	public void setResult(EventResultCode.ResultCode result) {
+	public void setResult(ResultCode result) {
 		this.resultCode = result.getResultCode();
 		this.resultMessage = result.getResultMessage();
 	}

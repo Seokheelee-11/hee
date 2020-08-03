@@ -14,7 +14,7 @@ import lombok.Data;
 @Data
 public class EventHistoryRequest {
 
-	@NotEmpty @NotBlank
+	@NotEmpty @NotBlank 
 	private String eventId;
 	
 	@NotEmpty @NotBlank

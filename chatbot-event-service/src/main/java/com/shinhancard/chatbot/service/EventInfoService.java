@@ -6,7 +6,8 @@ import org.springframework.stereotype.Service;
 import com.shinhancard.chatbot.controller.request.EventInfoRequest;
 import com.shinhancard.chatbot.controller.response.EventInfoResponse;
 import com.shinhancard.chatbot.domain.EventInfo;
-import com.shinhancard.chatbot.domain.EventResultCode;
+import com.shinhancard.chatbot.domain.EventInfo.RewardType;
+import com.shinhancard.chatbot.domain.ResultCode;
 import com.shinhancard.chatbot.repository.EventInfoRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class EventInfoService {
 	public EventInfo getEventById(String id) {
 		return eventInfoRepository.findOneById(id);
 	}
-	
+
 	public EventInfo updateEvent(String id, EventInfo event) {
 		EventInfo savedEvent = eventInfoRepository.findOneById(event.getId());
 		savedEvent.update(event);
@@ -42,39 +43,66 @@ public class EventInfoService {
 		ModelMapper modelMapper = new ModelMapper();
 		EventInfo eventInfo = modelMapper.map(eventInfoRequest, EventInfo.class);
 		EventInfoResponse eventInfoResponse = modelMapper.map(eventInfo, EventInfoResponse.class);
-		//resultCode setting
-		EventResultCode.ResultCode eventInfoResultCode;
+		// resultCode setting
+		ResultCode eventInfoResultCode = ResultCode.SUCCESS;
 
-		// validation 체크
-		eventInfoResultCode = getValidationEventInfo(eventInfo);
+		// EventId가 입력되었는지?
+		if (!eventInfo.getValidationEventId()) {
+			eventInfoResultCode = ResultCode.FAILED_NO_EVENTID_INPUT;
+		}
+		// Date 입력이 정상적으로 입력되었는지?
+		if (!eventInfo.getValidationDateInput()) {
+			eventInfoResultCode = ResultCode.FAILED_NO_DATE_INPUT;
+		}
+		if (!eventInfo.getValidationDateOrder()) {
+			eventInfoResultCode = ResultCode.FAILED_DATE_ORDER;
+		}
+		// OverLap 입력이 정상적으로 되었는지?
+		if (!eventInfo.getValidationOverLapInput()) {
+			eventInfoResultCode = ResultCode.FAILED_NO_OVERLAP_INPUT;
+		}
+		// rewardInfo 입력이 정상적으로 되었는지?
+		if (eventInfo.getRewardTf()) {
+			// default로 입력해야 할 값이 정상적으로 입력되었는가?
+			if (!eventInfo.getValidationRewardDefaultInput()) {
+				eventInfoResultCode = ResultCode.FAILED_NO_LIMIT_INPUT;
+			}
+			// RANDOMPROB일 때 확률의 값이 1 이하인가?
+			if (eventInfo.getRewardType().equals(RewardType.RANDOMPROB)) {
+				if (!eventInfo.getValidationRewardRandomProbInput()) {
+					eventInfoResultCode = ResultCode.FAILED_RANDOMPROB_OVER_ONE;
+				}
+			}
+		}
+
+		// QuizAnswer 입력이 정상적으로 되었는지?
+		if(eventInfo.getQuizTF()) {
+			if(!eventInfo.getValidationQuizAnswerInput()) {
+				eventInfoResultCode = ResultCode.FAILED_NO_QUIZANSWER_INPUT;	
+			}
+		}
 		
-		//validation 체크를 통과한 경우 DB에 저장
-		if(eventInfoResultCode.isSuccess()) {
+		// evendId가 중복되었는지?
+		if (getValidationEventIdOverLap(eventInfo)) {
+			eventInfoResultCode = ResultCode.FAILED_EVENTID_OVERLAP;
+		}
+
+		// validation 체크를 통과한 경우 DB에 저장
+		if (eventInfoResultCode.isSuccess()) {
 			eventInfoRepository.save(eventInfo);
 		}
-		//Response의 resultCode 채움
+		// Response의 resultCode 채움
 		eventInfoResponse.setResult(eventInfoResultCode);
-	
+		
 		return eventInfoResponse;
 	}
-	
 
-	public EventResultCode.ResultCode getValidationEventInfo(EventInfo eventInfo) {
-		EventResultCode.ResultCode result = EventResultCode.ResultCode.SUCCESS;
-		//default validation check
-		result = eventInfo.getDefaultValidation(result);
-		// evendId가 중복되었는지?
-		result = getValidationEventIdOverLap(eventInfo, result);
-		return result;
-	}
-
-	public EventResultCode.ResultCode getValidationEventIdOverLap(EventInfo eventInfo, EventResultCode.ResultCode result) {
-		EventInfo findEvent = eventInfoRepository.findOneByEventId(eventInfo.getEventId());
-		if (findEvent != null) {
-			result = EventResultCode.ResultCode.FAILED_EVENTID_OVERLAP;
+	public Boolean getValidationEventIdOverLap(EventInfo eventInfo) {
+		EventInfo findOneByEventId = eventInfoRepository.findOneByEventId(eventInfo.getEventId());
+		if (findOneByEventId != null) {
+			return false;
 		}
-		return result;
+		return true;
 	}
-
 
 }

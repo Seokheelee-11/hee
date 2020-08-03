@@ -23,25 +23,25 @@ public class EventInfo {
 	private LocalDateTime startDt;
 	private LocalDateTime endDt;
 
-	//중복 신청 관련 field
+	// 중복 신청 관련 field
 	private Boolean overLapTF;
 	private OverLapType overLapDateType;
 	private Integer overLapDateCount;
 	private Boolean includeDateTF;
 
-	//limit 관련 field
+	// limit 관련 field
 	private Boolean rewardTf;
 	private RewardType rewardType;
 	private LinkedHashMap<String, Double> rewardInfo = new LinkedHashMap<>();
-	
-	//quiz 신청 관련 field
+
+	// quiz 신청 관련 field
 	private Boolean quizTF;
 	private String quizAnswer;
 
-	//결과 field
+	// 결과 field
 	private HashMap<String, HashMap<String, String>> resultInfo = new HashMap<>();
-	
-	//대상자 선정
+
+	// 대상자 선정
 	private List<String> targetClnn;
 	private List<String> nonTargetClnn;
 
@@ -68,73 +68,66 @@ public class EventInfo {
 		return false;
 	}
 
-	public EventResultCode.ResultCode getDefaultValidation(EventResultCode.ResultCode result){	
-		// EventId가 입력되었는지?
-		result = this.getValidationEventId(result);
-		// Date 입력이 정상적으로 입력되었는지?
-		result = this.getValidationDateInput(result);
-		// OverLap 입력이 정상적으로 되었는지?
-		result = this.getValidationOverLapInput(result);
-		// rewardInfo 입력이 정상적으로 되었는지?
-		result = this.getValidationRewardInput(result);
-		// QuizAnswer 입력이 정상적으로 되었는지?
-		result = this.getValidationQuizAnswerInput(result);
+	public Boolean needOverLapLogics() {
 
-		return result;
-	}
-	
-	public EventResultCode.ResultCode getValidationRewardInput(EventResultCode.ResultCode result) {
-		if (this.rewardTf) {
-			if (this.rewardType == null || this.rewardInfo.isEmpty()) {
-				result = EventResultCode.ResultCode.FAILED_NO_LIMIT_INPUT;
-			}
-			// randomprob의 값이 1을 넘었는지?
-			if(RewardType.RANDOMPROB.equals(this.rewardType)) {
-				if (this.getTotalProb() > 1) {
-					result = EventResultCode.ResultCode.FAILED_RANDOMPROB_OVER_ONE;
-				}
-			}
+		if (!this.overLapDateType.equals(OverLapType.ALLTIME)) {
+			return true;
 		}
-		return result;
-	}
-	
+		return false;
 
-	public EventResultCode.ResultCode getValidationOverLapInput(EventResultCode.ResultCode result) {
+	}
+
+	public Boolean getValidationRewardDefaultInput() {
+		if (this.rewardType == null || this.rewardInfo.isEmpty()) {
+			return false;
+		}
+		return true;
+	}
+
+	public Boolean getValidationRewardRandomProbInput() {
+
+		// randomprob의 값이 1을 넘었는지?
+		if (this.getTotalProb() > 1) {
+			return false;
+		}
+		return true;
+	}
+
+	public Boolean getValidationOverLapInput() {
 		if (this.overLapTF) {
-			if (this.overLapDateType == null
-				||this.overLapDateCount == null
-				||this.includeDateTF == null) {
-				result = EventResultCode.ResultCode.FAILED_NO_OVERLAP_INPUT;
+			if (this.overLapDateType == null || this.overLapDateCount == null || this.includeDateTF == null) {
+				return false;
 			}
 		}
-		return result;
+		return true;
 	}
 
-
-	public EventResultCode.ResultCode getValidationQuizAnswerInput(EventResultCode.ResultCode result) {
-		if (this.quizTF) {
-			if (this.quizAnswer.isEmpty()) {
-				result = EventResultCode.ResultCode.FAILED_NO_QUIZANSWER_INPUT;
-			}
+	public Boolean getValidationQuizAnswerInput() {
+		if (this.quizAnswer.isEmpty()) {
+			return false;
 		}
-		return result;
+		return true;
 	}
 
-	public EventResultCode.ResultCode getValidationEventId(EventResultCode.ResultCode result) {
-		if(this.eventId.isEmpty()) {
-			result = EventResultCode.ResultCode.FAILED_NO_EVENTID_INPUT;
+	public Boolean getValidationEventId() {
+		if (this.eventId.isEmpty()) {
+			return false;
 		}
-		return result;
+		return true;
 	}
 
-	public EventResultCode.ResultCode getValidationDateInput(EventResultCode.ResultCode result) {
+	public Boolean getValidationDateInput() {
 		if (this.getStartDt() == null || this.getEndDt() == null) {
-			result = EventResultCode.ResultCode.FAILED_NO_DATE_INPUT;
+			return false;
 		}
-		else if (this.getStartDt().isAfter(this.getEndDt())) {
-			result = EventResultCode.ResultCode.FAILED_DATE_ORDER;
+		return true;
+	}
+
+	public Boolean getValidationDateOrder() {
+		if (this.getStartDt().isAfter(this.getEndDt())) {
+			return false;
 		}
-		return result;
+		return true;
 	}
 
 	public Double getTotalProb() {
@@ -147,14 +140,13 @@ public class EventInfo {
 		}
 		return totalProb;
 	}
-	public EventResultCode.ResultCode getEventDateValidate(EventResultCode.ResultCode result, LocalDateTime date) {
+
+	public Boolean getEventDateValidate(LocalDateTime date) {
 		if (this.startDt.isBefore(date) || this.endDt.isAfter(date)) {
-			result = EventResultCode.ResultCode.FAILED_NO_APPLY_DATE;
+			return false;
 		}
-		return result;
+		return true;
 	}
-
-
 
 	public boolean isRewardRandom() {
 		if (this.rewardType == RewardType.RANDOM) {

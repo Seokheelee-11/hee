@@ -36,18 +36,20 @@ public class EventHistory {
 		this.lastModDt = LocalDateTime.now();
 	}
 	
-	public EventResultCode.ResultCode getValidationEventHistory(EventResultCode.ResultCode result) {
-		// EventId가 입력되었는지?
+
+
+	public Boolean getValidationEventIdInput() {
 		if(this.eventId.isEmpty()) {
-			result = EventResultCode.ResultCode.FAILED_NO_EVENTID_INPUT;
+			return false;
 		}
-		// Clnn이 입력되었는지?
-		else if(this.clnn.isEmpty()) {
-			result = EventResultCode.ResultCode.FAILED_NO_CLNN_INPUT;
-		}
-		return result;
+		return true;
 	}
-	
+	public Boolean getValidationClnnInput() {
+		if(this.clnn.isEmpty()) {
+			return false;
+		}
+		return true;
+	}
 	
 	
 
