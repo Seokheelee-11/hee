@@ -15,8 +15,15 @@ public class EventHistoryLog {
 	private String rewardName;
 	
 	public EventHistoryLog() {
+		order = 1;
 		param = new ArrayList<String>();
 		rewardName = "default";
 		regDate = LocalDateTime.now();
 	}
+	
+
+
+	
+	
+	
 }

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.shinhancard.chatbot.domain.ResultCode;
+
 import lombok.Data;
 
 
@@ -14,7 +16,7 @@ public class EventHistoryResponse {
 
 	//결과메세지
 	private String resultCode;
-	private String responseMessage;
+	private String resultMessage;
 	
 	//request 기본 입력값
 	private String eventId;
@@ -34,6 +36,11 @@ public class EventHistoryResponse {
 	
 	public EventHistoryResponse() {
 		param = new ArrayList<String>();
+	}
+	
+	public void setResult(ResultCode result) {
+		this.resultCode = result.getResultCode();
+		this.resultMessage = result.getResultMessage();
 	}
 	
 }

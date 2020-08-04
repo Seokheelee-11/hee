@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -185,6 +185,119 @@ public class EventInfo {
 
 		return false;
 	}
+	
+	public String getReward(List<EventHistory> findEventId) {
+		String result = "default";	
+		
+		if(this.isRewardRandomProb()) {
+			result = getRewardRandomProb();
+		} else if(this.isRewardRandom()) {
+			result = getRewardRandom(findEventId);
+		} else if(this.isRewardFCFS()) {
+			result = getRewardFCFS(findEventId);
+		}
+		return result;
+	}
+	
+	
+	public String getRewardRandomProb() {
+		String result = "";
+		LinkedHashMap<String,Double> applicableWinner = setRandomProbWinner();
+		Double totalWinnerCount = getLastValue(applicableWinner);
+		
+		Random rand = new Random();
+		Double criteria = rand.nextDouble()%totalWinnerCount;
+		Set<String> keys = applicableWinner.keySet();
+		
+		for(String key : keys) {
+			if(criteria < applicableWinner.get(key)) {
+				result=key;
+				break;
+			}
+		}
+		return result;
+	}
+	
+	public String getRewardRandom(List<EventHistory> findEventId) {
+		String result = "";
+		LinkedHashMap<String,Double> applicableWinner = canApplyWinner(findEventId);
+		Double totalWinnerCount = getLastValue(applicableWinner);
+		
+		Random rand = new Random();
+		int criteria = rand.nextInt(totalWinnerCount.intValue());
+		
+		Set<String> keys = applicableWinner.keySet();	
+		for(String key : keys) {
+			if(criteria < applicableWinner.get(key).intValue()) {
+				result=key;
+				break;
+			}
+		}
+		return result;
+	}
+	public String getRewardFCFS(List<EventHistory> findEventId) {
+		String result = "";
+		LinkedHashMap<String,Double> applicableWinner = canApplyWinner(findEventId);
+		
+		Set<String> keys = applicableWinner.keySet();	
+		for(String key : keys) {
+			if(applicableWinner.get(key)!=0){
+				result = key;
+				break;
+			}
+		}
+		return result;
+	}
+	
+	public LinkedHashMap<String,Double> canApplyWinner(List<EventHistory> findEventId){
+		LinkedHashMap<String,Double> result = new LinkedHashMap<String, Double>();
+		Double totalprob = 0.0;
+		Set<String> keys = this.rewardInfo.keySet();
+		
+		for(String key : keys) {
+			totalprob += this.rewardInfo.get(key);
+			totalprob -= getRewardCount(findEventId, key);
+			result.put(key,totalprob);
+		}
+		return result;
+	}
+	
+	public Double getRewardCount(List<EventHistory> findEventId, String key) {
+		Double result=0.0;
+		for(int i=0;i<findEventId.size();i++) {
+			for(int j=0; j<findEventId.get(i).getLogs().size();j++) {
+				if(findEventId.get(i).getLogs().get(j).getRewardName().equals(key)) {
+					result += 1;
+				}
+			}
+		}		
+		return result;
+	}
+	
+	
+	public Double getLastValue(LinkedHashMap<String,Double> inputMap) {
+		Double result = 0.0;
+		Set<String> keys = inputMap.keySet();
+		for(String key:keys) {
+			result = inputMap.get(key);
+		}
+		return result;
+	}
+	
+	public LinkedHashMap<String,Double> setRandomProbWinner(){
+		LinkedHashMap<String,Double> result = new LinkedHashMap<String, Double>();
+		Double totalprob = 0.0;
+		Set<String> keys = this.rewardInfo.keySet();
+		
+		for(String key : keys) {
+			totalprob += this.rewardInfo.get(key);
+			result.put(key,totalprob);
+		}
+		return result;
+	}
+	
+	
+	
 
 	public enum RewardType {
 		FCFS, RANDOM, RANDOMPROB; // 랜덤 확률
@@ -232,5 +345,8 @@ public class EventInfo {
 			return false;
 		}
 	}
+	
+
+
 
 }

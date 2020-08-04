@@ -1,5 +1,6 @@
 package com.shinhancard.chatbot.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -56,8 +57,8 @@ public class EventHistoryService {
 		EventHistory eventHistory = modelMapper.map(eventHistoryRequest, EventHistory.class);
 		EventHistoryResponse eventHistoryResponse = modelMapper.map(eventHistory, EventHistoryResponse.class);
 		EventHistoryLog eventHistoryLog = new EventHistoryLog();
-		
-		//param이 requst로 입력된 경우 HistoryLog에 param 셋팅
+
+		// param이 requst로 입력된 경우 HistoryLog에 param 셋팅
 		if (!CollectionUtils.isEmpty(eventHistoryRequest.getParam())) {
 			eventHistoryLog.setParam(eventHistoryRequest.getParam());
 		}
@@ -88,61 +89,71 @@ public class EventHistoryService {
 		EventHistory findEventIdAndClnn = eventHistoryRepository.findOneByEventIdAndClnn(eventHistory.getEventId(),
 				eventHistory.getClnn());
 
-		//overLap 관련 로직
+		// overLap 관련 로직
 		if (eventHistoryResultCode.isSuccess() && getEventHistoryExistence(findEventIdAndClnn)) {
 			// EventIdandClnn으로 값을 찾으면 eventHistory domain객체의 값을 찾은 값으로 바꿈
 			eventHistory = findEventIdAndClnn;
+			eventHistoryLog.setOrder(findEventIdAndClnn.getLastOrder()+1);
 			// Event 신청 내역이 존재하는데, overLap이 False인 경우 "이미 이벤트에 신청한 것"
-			if(!findEventInfo.getOverLapTF()) {
+			if (!findEventInfo.getOverLapTF()) {
 				eventHistoryResultCode = ResultCode.FAILED_ALREADY_APPLIED;
 			}
 			// OverLap에 따른 이벤트 신청이 가능한지 파악함
-			else if(findEventInfo.needOverLapLogics()) {
-				//TODO:: include인 경우 로직
-				if(findEventInfo.getIncludeDateTF()) {
-					
-				}
-				// include가 아닌 경우 로직
-				else {
-					if(!eventHistory.canNoIncludeOverLap(findEventInfo, eventHistoryLog)) {
-						eventHistoryResultCode = ResultCode.FAILED_TIME_OVERLAP;
-					}
+			else if (findEventInfo.needOverLapLogics()) {
+				if (!eventHistory.canApplyOverLap(findEventInfo, eventHistoryLog)) {
+					eventHistoryResultCode = ResultCode.FAILED_TIME_OVERLAP;
 				}
 			}
 		}
 
 		// Reward 관련 로직
 		if (eventHistoryResultCode.isSuccess() && findEventInfo.getRewardTF()) {
-			List<EventHistory> findEventId = eventHistoryRepository.findAllByEventId(eventHistory.getEventId());
-
+			List<EventHistory> findEventId = getListEventId(eventHistory.getEventId());
 			// 신청 가능 건수를 초과하였는지 판단
 			if (!findEventInfo.getRewardType().equals(RewardType.RANDOMPROB)) {
 				if (!getEventOutOfOrder(findEventInfo, findEventId)) {
 					eventHistoryResultCode = ResultCode.FAILED_ORDERCOUNT_OVER;
 				}
 			}
-
-			// TODO:: Reward 값 구하는 로직 추가
-			// eventHistoryLog.setRewardName();
-
+			// Reward 값 구하는 로직
+			if (eventHistoryResultCode.isSuccess()) {
+//				findEventInfo.setReward(findEventId);
+//				String result = 
+				eventHistoryLog.setRewardName(findEventInfo.getReward(findEventId));
+			}
 		}
 
-		//Quiz 관련 로직
+		// Quiz 관련 로직
 		if (eventHistoryResultCode.isSuccess() && findEventInfo.getQuizTF()) {
 			// quiz 정답인지 판단하는 로직
 			if (getCorrectAnswer(findEventInfo, eventHistoryLog)) {
 				eventHistoryLog.setRewardName("default");
-			}
-			else {
+			} else {
 				eventHistoryResultCode = ResultCode.FAILED_NO_CORRECT_ANSWER;
 			}
 		}
-
+		
+		// validation 체크를 통과한 경우 DB에 저장
+		if (eventHistoryResultCode.isSuccess()) {
+			eventHistory = eventHistory.setEventHistory(eventHistoryLog);
+			eventHistoryRepository.save(eventHistory);
+		}
+		eventHistoryResponse.setResult(eventHistoryResultCode);
+		
+		
 		return eventHistoryResponse;
 	}
 
+	// find한 List의 값이 null이면 걍 선언만 해주고, null이 아니면 List로 전달
+	public List<EventHistory> getListEventId(String EventId) {
+		List<EventHistory> result = new ArrayList<EventHistory>();
 
-	
+		if (!CollectionUtils.isEmpty(eventHistoryRepository.findAllByEventId(EventId))) {
+			result = eventHistoryRepository.findAllByEventId(EventId);
+		}
+		return result;
+	}
+
 	public Boolean getCorrectAnswer(EventInfo findEventInfo, EventHistoryLog eventHistoryLog) {
 		if (findEventInfo.getQuizAnswer().equals(eventHistoryLog.getParam())) {
 			return true;
@@ -172,6 +183,13 @@ public class EventHistoryService {
 		return true;
 	}
 
+	public Boolean getEventIdExistence(List<EventHistory> findEventId) {
+		if (CollectionUtils.isEmpty(findEventId)) {
+			return false;
+		}
+		return true;
+	}
+
 	public Boolean getEventHistoryExistence(EventHistory findEventHistory) {
 		if (findEventHistory == null) {
 			return false;
@@ -179,4 +197,26 @@ public class EventHistoryService {
 		return true;
 	}
 
+	
+	/*
+	 * 
+	 function  이벤트 등록 {
+	 
+	 	 if (validateUserInput())
+	 	 	resultCode = 입력잘못됐어
+	 	 
+	 	 validateEvent();
+	 	 
+	 	 validateDup();
+	 	 
+	 	 
+	 }
+	 
+	 
+	 boolean validateUserInput() {
+	 
+	 */
+
+	
 }
+
