@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.shinhancard.chatbot.config.ModelMapperConfig;
 import com.shinhancard.chatbot.controller.request.EventHistoryRequest;
 import com.shinhancard.chatbot.controller.response.EventHistoryResponse;
 import com.shinhancard.chatbot.domain.EventHistory;
 import com.shinhancard.chatbot.domain.EventHistoryLog;
 import com.shinhancard.chatbot.domain.EventInfo;
-import com.shinhancard.chatbot.domain.EventInfo.RewardType;
 import com.shinhancard.chatbot.domain.ResultCode;
 import com.shinhancard.chatbot.repository.EventHistoryRepository;
 import com.shinhancard.chatbot.repository.EventInfoRepository;
@@ -54,15 +55,89 @@ public class EventHistoryService {
 
 	public EventHistoryResponse registEventHistory(EventHistoryRequest eventHistoryRequest) {
 		ModelMapper modelMapper = new ModelMapper();
+		
 		EventHistory eventHistory = modelMapper.map(eventHistoryRequest, EventHistory.class);
-		EventHistoryResponse eventHistoryResponse = modelMapper.map(eventHistory, EventHistoryResponse.class);
-		EventHistoryLog eventHistoryLog = new EventHistoryLog();
+		
+		EventHistoryLog eventHistoryLog = new EventHistoryLog(eventHistoryRequest);
+		EventInfo findEventInfo = eventInfoRepository.findOneByEventId(eventHistory.getEventId());
+		EventHistory findEventIdAndClnn = eventHistoryRepository.findOneByEventIdAndClnn(eventHistory.getEventId(),
+				eventHistory.getClnn());
+		ResultCode eventHistoryResultCode = ResultCode.SUCCESS;
 
-		// param이 requst로 입력된 경우 HistoryLog에 param 셋팅
-		if (!CollectionUtils.isEmpty(eventHistoryRequest.getParam())) {
-			eventHistoryLog.setParam(eventHistoryRequest.getParam());
+		// 입력값 Validation
+		if (!getInputValidation(eventHistory, findEventInfo, eventHistoryLog)) {
+			eventHistoryResultCode = ResultCode.FAILED_DEFAULT_INPUT;
 		}
 
+		// applyDate Validation
+		if (eventHistoryResultCode.isSuccess()) {
+			if (!findEventInfo.getEventDateValidate(eventHistoryLog.getRegDate())) {
+				eventHistoryResultCode = ResultCode.FAILED_NO_APPLY_DATE;
+			}
+		}
+
+		// overLap 관련 로직
+		if (eventHistoryResultCode.isSuccess() && getEventHistoryExistence(findEventIdAndClnn)) {
+			// EventIdandClnn으로 값을 찾으면 eventHistory domain객체의 값을 찾은 값으로 바꿈
+			eventHistory = findEventIdAndClnn;
+			eventHistoryLog.setOrder(findEventIdAndClnn.getLastOrder() + 1);
+
+			// overLap 신청 가능한지 여부 판단
+			if (!getOverLapValidation(eventHistory, findEventInfo, eventHistoryLog)) {
+				eventHistoryResultCode = ResultCode.FAILED_OVERLAP_VALIDATE;
+			}
+		}
+
+		// Reward 관련 로직
+		if (eventHistoryResultCode.isSuccess() && findEventInfo.getRewardTF()) {
+			List<EventHistory> findEventId = getListEventId(eventHistory.getEventId());
+			// reward 처리
+			if (!getRewardValidation(findEventInfo, findEventId, eventHistoryLog)) {
+				eventHistoryResultCode = ResultCode.FAILED_GET_REWARD;
+			} else {
+				eventHistoryLog.setRewardName(findEventInfo.getReward(findEventId));
+			}
+		}
+
+		// validation 체크를 통과한 경우 DB에 저장
+		EventHistoryResponse eventHistoryResponse = new EventHistoryResponse();
+		
+		if (eventHistoryResultCode.isSuccess()) {
+			eventHistory = eventHistory.setEventHistory(eventHistoryLog);
+			eventHistoryRepository.save(eventHistory);
+			modelMapper.addMappings(ModelMapperConfig.eventHistoryToResponse);
+			eventHistoryResponse = modelMapper.map(eventHistory, EventHistoryResponse.class);
+		}
+		
+		
+		eventHistoryResponse.setResult(eventHistoryResultCode);
+
+		return eventHistoryResponse;
+	}
+
+	public Boolean getOverLapValidation(EventHistory eventHistory, EventInfo findEventInfo,
+			EventHistoryLog eventHistoryLog) {
+		ResultCode eventHistoryResultCode = ResultCode.SUCCESS;
+
+		// Event 신청 내역이 존재하는데, overLap이 False인 경우 "이미 이벤트에 신청한 것"
+		if (!findEventInfo.getOverLapTF()) {
+			eventHistoryResultCode = ResultCode.FAILED_ALREADY_APPLIED;
+		}
+		// OverLap에 따른 이벤트 신청이 가능한지 파악함
+		else if (findEventInfo.needOverLapLogics()) {
+			if (!eventHistory.canApplyOverLap(findEventInfo, eventHistoryLog)) {
+				eventHistoryResultCode = ResultCode.FAILED_TIME_OVERLAP;
+			}
+		}
+		if (eventHistoryResultCode.isSuccess()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public Boolean getInputValidation(EventHistory eventHistory, EventInfo findEventInfo,
+			EventHistoryLog eventHistoryLog) {
 		ResultCode eventHistoryResultCode = ResultCode.SUCCESS;
 
 		// 기본 validation check
@@ -73,75 +148,16 @@ public class EventHistoryService {
 			eventHistoryResultCode = ResultCode.FAILED_NO_CLNN_INPUT;
 		}
 
-		EventInfo findEventInfo = eventInfoRepository.findOneByEventId(eventHistory.getEventId());
 		// findEventInfo Validation
 		if (!getEventInfoExistence(findEventInfo)) {
 			eventHistoryResultCode = ResultCode.FAILED_CANT_FIND_EVENTID;
 		}
 
-		// applyDate Validation
 		if (eventHistoryResultCode.isSuccess()) {
-			if (!findEventInfo.getEventDateValidate(eventHistoryLog.getRegDate())) {
-				eventHistoryResultCode = ResultCode.FAILED_NO_APPLY_DATE;
-			}
+			return true;
+		} else {
+			return false;
 		}
-
-		EventHistory findEventIdAndClnn = eventHistoryRepository.findOneByEventIdAndClnn(eventHistory.getEventId(),
-				eventHistory.getClnn());
-
-		// overLap 관련 로직
-		if (eventHistoryResultCode.isSuccess() && getEventHistoryExistence(findEventIdAndClnn)) {
-			// EventIdandClnn으로 값을 찾으면 eventHistory domain객체의 값을 찾은 값으로 바꿈
-			eventHistory = findEventIdAndClnn;
-			eventHistoryLog.setOrder(findEventIdAndClnn.getLastOrder()+1);
-			// Event 신청 내역이 존재하는데, overLap이 False인 경우 "이미 이벤트에 신청한 것"
-			if (!findEventInfo.getOverLapTF()) {
-				eventHistoryResultCode = ResultCode.FAILED_ALREADY_APPLIED;
-			}
-			// OverLap에 따른 이벤트 신청이 가능한지 파악함
-			else if (findEventInfo.needOverLapLogics()) {
-				if (!eventHistory.canApplyOverLap(findEventInfo, eventHistoryLog)) {
-					eventHistoryResultCode = ResultCode.FAILED_TIME_OVERLAP;
-				}
-			}
-		}
-
-		// Reward 관련 로직
-		if (eventHistoryResultCode.isSuccess() && findEventInfo.getRewardTF()) {
-			List<EventHistory> findEventId = getListEventId(eventHistory.getEventId());
-			// 신청 가능 건수를 초과하였는지 판단
-			if (!findEventInfo.getRewardType().equals(RewardType.RANDOMPROB)) {
-				if (!getEventOutOfOrder(findEventInfo, findEventId)) {
-					eventHistoryResultCode = ResultCode.FAILED_ORDERCOUNT_OVER;
-				}
-			}
-			// Reward 값 구하는 로직
-			if (eventHistoryResultCode.isSuccess()) {
-//				findEventInfo.setReward(findEventId);
-//				String result = 
-				eventHistoryLog.setRewardName(findEventInfo.getReward(findEventId));
-			}
-		}
-
-		// Quiz 관련 로직
-		if (eventHistoryResultCode.isSuccess() && findEventInfo.getQuizTF()) {
-			// quiz 정답인지 판단하는 로직
-			if (getCorrectAnswer(findEventInfo, eventHistoryLog)) {
-				eventHistoryLog.setRewardName("default");
-			} else {
-				eventHistoryResultCode = ResultCode.FAILED_NO_CORRECT_ANSWER;
-			}
-		}
-		
-		// validation 체크를 통과한 경우 DB에 저장
-		if (eventHistoryResultCode.isSuccess()) {
-			eventHistory = eventHistory.setEventHistory(eventHistoryLog);
-			eventHistoryRepository.save(eventHistory);
-		}
-		eventHistoryResponse.setResult(eventHistoryResultCode);
-		
-		
-		return eventHistoryResponse;
 	}
 
 	// find한 List의 값이 null이면 걍 선언만 해주고, null이 아니면 List로 전달
@@ -161,11 +177,19 @@ public class EventHistoryService {
 		return false;
 	}
 
-	public Boolean getEventOutOfOrder(EventInfo findEventInfo, List<EventHistory> findEventId) {
-		if (findEventInfo.getTotalCount() > getTotalOrderCount(findEventId)) {
-			return true;
+	public Boolean getRewardValidation(EventInfo findEventInfo, List<EventHistory> findEventId,
+			EventHistoryLog eventHistoryLog) {
+		if (findEventInfo.getRewardType().isRewardFCFS() || findEventInfo.getRewardType().isRewardRandom()) {
+			if (findEventInfo.getTotalCount() > getTotalOrderCount(findEventId)) {
+				return false;
+			}
+		} else if (findEventInfo.getRewardType().isRewardQuiz()) {
+			// quiz 정답인지 판단하는 로직
+			if (!getCorrectAnswer(findEventInfo, eventHistoryLog)) {
+				return false;
+			}
 		}
-		return false;
+		return true;
 	}
 
 	public Integer getTotalOrderCount(List<EventHistory> findEventId) {
@@ -197,26 +221,22 @@ public class EventHistoryService {
 		return true;
 	}
 
-	
 	/*
 	 * 
-	 function  이벤트 등록 {
-	 
-	 	 if (validateUserInput())
-	 	 	resultCode = 입력잘못됐어
-	 	 
-	 	 validateEvent();
-	 	 
-	 	 validateDup();
-	 	 
-	 	 
-	 }
-	 
-	 
-	 boolean validateUserInput() {
-	 
+	 * function 이벤트 등록 {
+	 * 
+	 * if (validateUserInput()) resultCode = 입력잘못됐어
+	 * 
+	 * validateEvent();
+	 * 
+	 * validateDup();
+	 * 
+	 * 
+	 * }
+	 * 
+	 * 
+	 * boolean validateUserInput() {
+	 * 
 	 */
 
-	
 }
-

@@ -46,45 +46,9 @@ public class EventInfoService {
 		// resultCode setting
 		ResultCode eventInfoResultCode = ResultCode.SUCCESS;
 
-		// EventId가 입력되었는지?
-		if (!eventInfo.getValidationEventId()) {
-			eventInfoResultCode = ResultCode.FAILED_NO_EVENTID_INPUT;
-		}
-		// Date 입력이 정상적으로 입력되었는지?
-		if (!eventInfo.getValidationDateInput()) {
-			eventInfoResultCode = ResultCode.FAILED_NO_DATE_INPUT;
-		}
-		if (!eventInfo.getValidationDateOrder()) {
-			eventInfoResultCode = ResultCode.FAILED_DATE_ORDER;
-		}
-		// OverLap 입력이 정상적으로 되었는지?
-		if (!eventInfo.getValidationOverLapInput()) {
-			eventInfoResultCode = ResultCode.FAILED_NO_OVERLAP_INPUT;
-		}
-		// rewardInfo 입력이 정상적으로 되었는지?
-		if (eventInfo.getRewardTF()) {
-			// default로 입력해야 할 값이 정상적으로 입력되었는가?
-			if (!eventInfo.getValidationRewardDefaultInput()) {
-				eventInfoResultCode = ResultCode.FAILED_NO_LIMIT_INPUT;
-			}
-			// RANDOMPROB일 때 확률의 값이 1 이하인가?
-			if (eventInfo.getRewardType().equals(RewardType.RANDOMPROB)) {
-				if (!eventInfo.getValidationRewardRandomProbInput()) {
-					eventInfoResultCode = ResultCode.FAILED_RANDOMPROB_OVER_ONE;
-				}
-			}
-		}
-
-		// QuizAnswer 입력이 정상적으로 되었는지?
-		if(eventInfo.getQuizTF()) {
-			if(!eventInfo.getValidationQuizAnswerInput()) {
-				eventInfoResultCode = ResultCode.FAILED_NO_QUIZANSWER_INPUT;	
-			}
-		}
-		
-		// evendId가 중복되었는지?
-		if (getValidationEventIdOverLap(eventInfo)) {
-			eventInfoResultCode = ResultCode.FAILED_EVENTID_OVERLAP;
+		// 입력값 Validation
+		if (!getInputValidation(eventInfo)) {
+			eventInfoResultCode = ResultCode.FAILED_DEFAULT_INPUT;
 		}
 
 		// validation 체크를 통과한 경우 DB에 저장
@@ -93,8 +57,58 @@ public class EventInfoService {
 		}
 		// Response의 resultCode 채움
 		eventInfoResponse.setResult(eventInfoResultCode);
-		
+
 		return eventInfoResponse;
+	}
+
+	
+	
+	public Boolean getInputValidation(EventInfo eventInfo) {
+		ResultCode resultCode = ResultCode.SUCCESS;
+		// EventId가 입력되었는지?
+		if (!eventInfo.getValidationEventId()) {
+			resultCode = ResultCode.FAILED_NO_EVENTID_INPUT;
+		}
+		// Date 입력이 정상적으로 입력되었는지?
+		if (!eventInfo.getValidationDateInput()) {
+			resultCode = ResultCode.FAILED_NO_DATE_INPUT;
+		}
+		if (!eventInfo.getValidationDateOrder()) {
+			resultCode = ResultCode.FAILED_DATE_ORDER;
+		}
+		// OverLap 입력이 정상적으로 되었는지?
+		if (!eventInfo.getValidationOverLapInput()) {
+			resultCode = ResultCode.FAILED_NO_OVERLAP_INPUT;
+		}
+		// rewardInfo 입력이 정상적으로 되었는지?
+		if (eventInfo.getRewardTF()) {
+			// default로 입력해야 할 값이 정상적으로 입력되었는가?
+			if (!eventInfo.getValidationRewardDefaultInput()) {
+				resultCode = ResultCode.FAILED_NO_LIMIT_INPUT;
+			}
+			// RANDOMPROB일 때 확률의 값이 1 이하인가?
+			if (eventInfo.getRewardType().equals(RewardType.RANDOMPROB)) {
+				if (!eventInfo.getValidationRewardRandomProbInput()) {
+					resultCode = ResultCode.FAILED_RANDOMPROB_OVER_ONE;
+				}
+			}
+		}
+
+		// QuizAnswer 입력이 정상적으로 되었는지?
+		if (eventInfo.getQuizTF()) {
+			if (!eventInfo.getValidationQuizAnswerInput()) {
+				resultCode = ResultCode.FAILED_NO_QUIZANSWER_INPUT;
+			}
+		}
+
+		// evendId가 중복되었는지?
+		if (getValidationEventIdOverLap(eventInfo)) {
+			resultCode = ResultCode.FAILED_EVENTID_OVERLAP;
+		}
+		
+		if(resultCode.isSuccess()) return true;
+		else return false;
+		
 	}
 
 	public Boolean getValidationEventIdOverLap(EventInfo eventInfo) {

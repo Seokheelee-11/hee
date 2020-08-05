@@ -162,39 +162,19 @@ public class EventInfo {
 		return true;
 	}
 
-	public boolean isRewardRandom() {
-		if (this.rewardType == RewardType.RANDOM) {
-			return true;
-		}
 
-		return false;
-	}
-
-	public boolean isRewardFCFS() {
-		if (this.rewardType == RewardType.FCFS) {
-			return true;
-		}
-
-		return false;
-	}
-
-	public boolean isRewardRandomProb() {
-		if (this.rewardType == RewardType.RANDOMPROB) {
-			return true;
-		}
-
-		return false;
-	}
 	
 	public String getReward(List<EventHistory> findEventId) {
 		String result = "default";	
 		
-		if(this.isRewardRandomProb()) {
+		if(this.rewardType.isRewardRandomProb()) {
 			result = getRewardRandomProb();
-		} else if(this.isRewardRandom()) {
+		} else if(this.rewardType.isRewardRandom()) {
 			result = getRewardRandom(findEventId);
-		} else if(this.isRewardFCFS()) {
+		} else if(this.rewardType.isRewardFCFS()) {
 			result = getRewardFCFS(findEventId);
+		} else if(this.rewardType.isRewardQuiz()) {
+			result = "default";
 		}
 		return result;
 	}
@@ -300,9 +280,37 @@ public class EventInfo {
 	
 
 	public enum RewardType {
-		FCFS, RANDOM, RANDOMPROB; // 랜덤 확률
+		FCFS, RANDOM, RANDOMPROB,QUIZ; // 랜덤 확률
+		public boolean isRewardRandom() {
+			if (this.equals(RewardType.RANDOM)) {
+				return true;
+			}
+
+			return false;
+		}
+
+		public boolean isRewardFCFS() {
+			if (this.equals(RewardType.FCFS)) {
+				return true;
+			}
+
+			return false;
+		}
+
+		public boolean isRewardRandomProb() {
+			if (this.equals(RewardType.RANDOMPROB)) {
+				return true;
+			}
+			return false;
+		}
 		
-		// QUIZ // QUIZ는 여기 있으면 안됨 나중에 수정할 수 있도록
+		public boolean isRewardQuiz() {
+			if (this.equals(RewardType.QUIZ)) {
+				return true;
+			}
+			return false;
+		}
+
 	}
 
 	public enum OverLapType {
