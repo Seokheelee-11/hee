@@ -32,7 +32,7 @@ public class EventInfoRequest {
 	private LinkedHashMap<String, Double> rewardInfo = new LinkedHashMap<>();
 	
 	//quiz 신청 관련 field
-	private Boolean quizTF;
+//	private Boolean quizTF;
 	private String quizAnswer;
 	
 	//결과 field

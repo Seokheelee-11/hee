@@ -28,6 +28,7 @@ public class EventHistoryResponse {
 	
 	private List<String> param;
 	private String rewardName;
+	private String responseMessage;
 
 	private Integer eventAppliedOrder;
 	private Integer dDateCount;

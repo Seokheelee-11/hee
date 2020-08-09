@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.modelmapper.PropertyMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.shinhancard.chatbot.config.ModelMapperConfig;
 import com.shinhancard.chatbot.controller.request.EventHistoryRequest;
 import com.shinhancard.chatbot.controller.response.EventHistoryResponse;
 import com.shinhancard.chatbot.domain.EventHistory;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class EventHistoryService {
+	private static final Logger log = LoggerFactory.getLogger(EventHistoryService.class);
 	private final EventHistoryRepository eventHistoryRepository;
 	private final EventInfoRepository eventInfoRepository;
 
@@ -55,9 +57,9 @@ public class EventHistoryService {
 
 	public EventHistoryResponse registEventHistory(EventHistoryRequest eventHistoryRequest) {
 		ModelMapper modelMapper = new ModelMapper();
-		
+
 		EventHistory eventHistory = modelMapper.map(eventHistoryRequest, EventHistory.class);
-		
+
 		EventHistoryLog eventHistoryLog = new EventHistoryLog(eventHistoryRequest);
 		EventInfo findEventInfo = eventInfoRepository.findOneByEventId(eventHistory.getEventId());
 		EventHistory findEventIdAndClnn = eventHistoryRepository.findOneByEventIdAndClnn(eventHistory.getEventId(),
@@ -101,18 +103,27 @@ public class EventHistoryService {
 
 		// validation 체크를 통과한 경우 DB에 저장
 		EventHistoryResponse eventHistoryResponse = new EventHistoryResponse();
-		
 		if (eventHistoryResultCode.isSuccess()) {
 			eventHistory = eventHistory.setEventHistory(eventHistoryLog);
 			eventHistoryRepository.save(eventHistory);
-			modelMapper.addMappings(ModelMapperConfig.eventHistoryToResponse);
-			eventHistoryResponse = modelMapper.map(eventHistory, EventHistoryResponse.class);
+			// Response Setting
+			eventHistoryResponse = setEventHistoryResponse(eventHistory, eventHistoryResponse, findEventInfo);
 		}
-		
-		
 		eventHistoryResponse.setResult(eventHistoryResultCode);
-
 		return eventHistoryResponse;
+	}
+
+	public EventHistoryResponse setEventHistoryResponse(EventHistory eventHistory,
+			EventHistoryResponse eventHistoryResponse, EventInfo findEventInfo) {
+		EventHistoryResponse result = new EventHistoryResponse();
+		ModelMapper modelMapper = new ModelMapper();
+		modelMapper.addMappings(eventHistoryToResponse);
+		eventHistoryResponse = modelMapper.map(eventHistory, EventHistoryResponse.class);
+		modelMapper.addMappings(eventInfoToResponse);
+		eventHistoryResponse = modelMapper.map(findEventInfo, EventHistoryResponse.class);
+
+		return result;
+
 	}
 
 	public Boolean getOverLapValidation(EventHistory eventHistory, EventInfo findEventInfo,
@@ -221,22 +232,22 @@ public class EventHistoryService {
 		return true;
 	}
 
-	/*
-	 * 
-	 * function 이벤트 등록 {
-	 * 
-	 * if (validateUserInput()) resultCode = 입력잘못됐어
-	 * 
-	 * validateEvent();
-	 * 
-	 * validateDup();
-	 * 
-	 * 
-	 * }
-	 * 
-	 * 
-	 * boolean validateUserInput() {
-	 * 
-	 */
+	public PropertyMap<EventHistory, EventHistoryResponse> eventHistoryToResponse = new PropertyMap<EventHistory, EventHistoryResponse>() {
+		protected void configure() {
+			map().setRewardName(source.getLastHistory().getRewardName());
+			map().setParam(source.getLastHistory().getParam());
+		}
+	};
+
+	public PropertyMap<EventInfo, EventHistoryResponse> eventInfoToResponse = new PropertyMap<EventInfo, EventHistoryResponse>() {
+		protected void configure() {
+			if (source.getResultInfo().containsKey(map().getRewardName())) {
+				map().setResultInfo(source.getResultInfo().get(map().getRewardName()));
+				if (source.getResultInfo().get(map().getRewardName()).containsKey("responseMessage")) {
+					map().setResponseMessage(source.getResultInfo().get(map().getRewardName()).get("responseMessage"));
+				}
+			}
+		}
+	};
 
 }

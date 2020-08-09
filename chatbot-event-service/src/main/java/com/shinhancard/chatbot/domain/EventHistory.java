@@ -45,6 +45,12 @@ public class EventHistory {
 		return this;
 	}
 	
+	public EventHistoryLog getLastHistory() {
+		EventHistoryLog result =this.logs.get(this.logs.size());
+		return result;
+	}
+	
+	
 	public Boolean canApplyOverLap(EventInfo findEventInfo, EventHistoryLog eventHistoryLog) {
 		// include인 경우 로직
 		if(findEventInfo.getIncludeDateTF()) {
