@@ -23,11 +23,24 @@ public class ModelMapperConfig {
 	public PropertyMap<EventHistory, EventHistoryResponse> eventHistoryToResponse = new PropertyMap<EventHistory, EventHistoryResponse>() {
 		protected void configure() {
 
-//			map().setRewardName(source.getHistoryEnd().getRewardName());
-//			map().setParam(source.getHistoryEnd().getParam());
-//			map().setOrderCount(source.getHistoryEnd().getOrderCount());
-//			map().setDate(source.getHistoryEnd().getDate());
+			map().setRewardName(source.getHistoryEnd().getRewardName());
+			map().setParam(source.getHistoryEnd().getParam());
+			map().setOrderCount(source.getHistoryEnd().getOrderCount());
+			map().setDate(source.getHistoryEnd().getDate());
 			
 		}
 	};
+	
+	
 }
+
+public eventHistoryToResponsePropertyMap<EventHistory, EventHistoryResponse> eventHistoryToResponse = new PropertyMap<EventHistory, EventHistoryResponse>() {
+	protected void configure() {
+
+//		map().setRewardName(source.getHistoryEnd().getRewardName());
+//		map().setParam(source.getHistoryEnd().getParam());
+//		map().setOrderCount(source.getHistoryEnd().getOrderCount());
+//		map().setDate(source.getHistoryEnd().getDate());
+		
+	}
+};
