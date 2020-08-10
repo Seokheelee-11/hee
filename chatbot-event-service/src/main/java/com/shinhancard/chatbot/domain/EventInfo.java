@@ -37,8 +37,8 @@ public class EventInfo {
 	private RewardType rewardType;
 	private LinkedHashMap<String, Double> rewardInfo = new LinkedHashMap<>();
 
-	// quiz 신청 관련 field
-	private Boolean quizTF;
+//	// quiz 신청 관련 field
+//	private Boolean quizTF;
 	private List<String> quizAnswer;
 
 	// 결과 field
@@ -201,6 +201,7 @@ public class EventInfo {
 	public String getRewardRandom(List<EventHistory> findEventId) {
 		String result = "";
 		LinkedHashMap<String,Double> applicableWinner = canApplyWinner(findEventId);
+		
 		Double totalWinnerCount = getLastValue(applicableWinner);
 		
 		Random rand = new Random();

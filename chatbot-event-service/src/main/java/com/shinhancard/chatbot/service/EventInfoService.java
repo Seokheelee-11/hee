@@ -1,6 +1,8 @@
 package com.shinhancard.chatbot.service;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.shinhancard.chatbot.controller.request.EventInfoRequest;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EventInfoService {
 
+	private static final Logger log = LoggerFactory.getLogger(EventInfoService.class);
 	private final EventInfoRepository eventInfoRepository;
 
 	public EventInfo getEventById(String id) {
@@ -61,8 +64,6 @@ public class EventInfoService {
 		return eventInfoResponse;
 	}
 
-	
-	
 	public Boolean getInputValidation(EventInfo eventInfo) {
 		ResultCode resultCode = ResultCode.SUCCESS;
 		// EventId가 입력되었는지?
@@ -94,29 +95,27 @@ public class EventInfoService {
 			}
 		}
 
-		// QuizAnswer 입력이 정상적으로 되었는지?
-		if (eventInfo.getQuizTF()) {
-			if (!eventInfo.getValidationQuizAnswerInput()) {
-				resultCode = ResultCode.FAILED_NO_QUIZANSWER_INPUT;
-			}
-		}
-
 		// evendId가 중복되었는지?
 		if (getValidationEventIdOverLap(eventInfo)) {
 			resultCode = ResultCode.FAILED_EVENTID_OVERLAP;
 		}
-		
-		if(resultCode.isSuccess()) return true;
-		else return false;
-		
+
+		log.trace("resultCode", resultCode.getResultMessage());
+
+		if (resultCode.isSuccess())
+			return true;
+		else
+			return false;
+
 	}
 
 	public Boolean getValidationEventIdOverLap(EventInfo eventInfo) {
 		EventInfo findOneByEventId = eventInfoRepository.findOneByEventId(eventInfo.getEventId());
-		if (findOneByEventId != null) {
+		if (findOneByEventId == null) {
 			return false;
+		} else {
+			return true;
 		}
-		return true;
 	}
 
 }

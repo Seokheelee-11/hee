@@ -18,7 +18,9 @@ import com.shinhancard.chatbot.repository.EventInfoRepository;
 import com.shinhancard.chatbot.service.EventInfoService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("eventInfo")
 @RequiredArgsConstructor
@@ -39,6 +41,7 @@ public class EventInfoController {
 	
 	@PostMapping
 	public EventInfoResponse registEvent(@RequestBody EventInfoRequest eventInfoRequest) {
+		log.info("apply request {}", eventInfoRequest.toString());
 		return eventInfoService.registEvent(eventInfoRequest);
 	}
 	
