@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -20,11 +18,13 @@ import com.shinhancard.chatbot.repository.EventHistoryRepository;
 import com.shinhancard.chatbot.repository.EventInfoRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventHistoryService {
-	private static final Logger log = LoggerFactory.getLogger(EventHistoryService.class);
+
 	private final EventHistoryRepository eventHistoryRepository;
 	private final EventInfoRepository eventInfoRepository;
 
@@ -57,19 +57,24 @@ public class EventHistoryService {
 
 	public EventHistoryResponse registEventHistory(EventHistoryRequest eventHistoryRequest) {
 		ModelMapper modelMapper = new ModelMapper();
+		log.info("mapper 생성자 만들어짐");
 		EventHistory eventHistory = modelMapper.map(eventHistoryRequest, EventHistory.class);
-
+		log.info("eventHistoryRequest : {}, eventHistory : {}", eventHistoryRequest.toString(),
+				eventHistory.toString());
+		log.info("mapper 통과");
 		EventHistoryLog eventHistoryLog = new EventHistoryLog(eventHistoryRequest);
 		EventInfo findEventInfo = eventInfoRepository.findOneByEventId(eventHistory.getEventId());
 		EventHistory findEventIdAndClnn = eventHistoryRepository.findOneByEventIdAndClnn(eventHistory.getEventId(),
 				eventHistory.getClnn());
 		ResultCode eventHistoryResultCode = ResultCode.SUCCESS;
 
+		log.info("입력값 Validation 진행");
 		// 입력값 Validation
 		if (!getInputValidation(eventHistory, findEventInfo, eventHistoryLog)) {
 			eventHistoryResultCode = ResultCode.FAILED_DEFAULT_INPUT;
 		}
 
+		log.info("applyDate Validation 진행");
 		// applyDate Validation
 		if (eventHistoryResultCode.isSuccess()) {
 			if (!findEventInfo.getEventDateValidate(eventHistoryLog.getRegDate())) {
@@ -77,6 +82,7 @@ public class EventHistoryService {
 			}
 		}
 
+		log.info("overLap 관련 로직 진행");
 		// overLap 관련 로직
 		if (eventHistoryResultCode.isSuccess() && getEventHistoryExistence(findEventIdAndClnn)) {
 			// EventIdandClnn으로 값을 찾으면 eventHistory domain객체의 값을 찾은 값으로 바꿈
@@ -89,6 +95,7 @@ public class EventHistoryService {
 			}
 		}
 
+		log.info("Reward 관련 로직 진행");
 		// Reward 관련 로직
 		if (eventHistoryResultCode.isSuccess() && findEventInfo.getRewardTF()) {
 			List<EventHistory> findEventId = getListEventId(eventHistory.getEventId());
@@ -100,6 +107,7 @@ public class EventHistoryService {
 			}
 		}
 
+		log.info("validation 체크를 통과한 경우 DB에 저장 진행");
 		// validation 체크를 통과한 경우 DB에 저장
 		EventHistoryResponse eventHistoryResponse = new EventHistoryResponse();
 		if (eventHistoryResultCode.isSuccess()) {
@@ -114,15 +122,16 @@ public class EventHistoryService {
 
 	public EventHistoryResponse setEventHistoryResponse(EventHistory eventHistory,
 			EventHistoryResponse eventHistoryResponse, EventInfo findEventInfo) {
-		EventHistoryResponse result = new EventHistoryResponse();
+
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.addMappings(eventHistoryToResponse);
 		eventHistoryResponse = modelMapper.map(eventHistory, EventHistoryResponse.class);
-		modelMapper.addMappings(eventInfoToResponse);
-		eventHistoryResponse = modelMapper.map(findEventInfo, EventHistoryResponse.class);
-
-		return result;
-
+		log.info("eventHistory to EventHistoryResponse Mapping success {}, {}", eventHistory, eventHistoryResponse);
+		//modelMapper.addMappings(eventInfoToResponse);
+		// result = modelMapper.map(findEventInfo, EventHistoryResponse.class);
+		eventHistoryResponse = eventInfoToResponse(findEventInfo, eventHistoryResponse);
+		log.info("EventInfo to EventHistoryResponse Mapping success {}, {}", findEventInfo, eventHistoryResponse);
+		return eventHistoryResponse;
 	}
 
 	public Boolean getOverLapValidation(EventHistory eventHistory, EventInfo findEventInfo,
@@ -150,18 +159,23 @@ public class EventHistoryService {
 			EventHistoryLog eventHistoryLog) {
 		ResultCode eventHistoryResultCode = ResultCode.SUCCESS;
 
+		log.info("기본 validation check 진행 시작: {}", eventHistoryResultCode);
+
 		// 기본 validation check
 		if (!eventHistory.getValidationEventIdInput()) {
 			eventHistoryResultCode = ResultCode.FAILED_NO_EVENTID_INPUT;
 		}
+		log.info("EventId Input check : {}", eventHistoryResultCode);
 		if (!eventHistory.getValidationClnnInput()) {
 			eventHistoryResultCode = ResultCode.FAILED_NO_CLNN_INPUT;
 		}
+		log.info("Clnn Input validation check : {}", eventHistoryResultCode);
 
 		// findEventInfo Validation
 		if (!getEventInfoExistence(findEventInfo)) {
 			eventHistoryResultCode = ResultCode.FAILED_CANT_FIND_EVENTID;
 		}
+		log.info("findEventInfo Validation : {}", eventHistoryResultCode);
 
 		if (eventHistoryResultCode.isSuccess()) {
 			return true;
@@ -231,22 +245,43 @@ public class EventHistoryService {
 		return true;
 	}
 
+//	public PropertyMap<EventHistoryRequest, EventHistory> eventHistoryRequestToHistory = new PropertyMap<EventHistoryRequest, EventHistory>() {
+//		protected void configure() {
+//			map().setClnn(clnn);
+//		}
+//
+//	};
+
 	public PropertyMap<EventHistory, EventHistoryResponse> eventHistoryToResponse = new PropertyMap<EventHistory, EventHistoryResponse>() {
 		protected void configure() {
+
 			map().setRewardName(source.getLastHistory().getRewardName());
 			map().setParam(source.getLastHistory().getParam());
 		}
 	};
 
-	public PropertyMap<EventInfo, EventHistoryResponse> eventInfoToResponse = new PropertyMap<EventInfo, EventHistoryResponse>() {
-		protected void configure() {
-			if (source.getResultInfo().containsKey(map().getRewardName())) {
-				map().setResultInfo(source.getResultInfo().get(map().getRewardName()));
-				if (source.getResultInfo().get(map().getRewardName()).containsKey("responseMessage")) {
-					map().setResponseMessage(source.getResultInfo().get(map().getRewardName()).get("responseMessage"));
-				}
+	// Ensure that method has one parameter and returns void. 이런 에러가 떨어짐
+	// modelmapper config 의 경우에 인자를 받는 method호출이 불가함
+//	public PropertyMap<EventInfo, EventHistoryResponse> eventInfoToResponse = new PropertyMap<EventInfo, EventHistoryResponse>() {
+//		protected void configure() {
+//			if (source.getResultInfoContainsKey(map().getRewardName())) {
+//				map().setResultInfo(source.getResultInfoRewardName(map().getRewardName()));
+//				if (source.getResultInfoContainsResponseMessage(map().getRewardName())) {
+//					map().setResponseMessage(source.getResultInfoResponseMessage(map().getRewardName()));
+//				}
+//			}
+//		}
+//	};
+
+	public EventHistoryResponse eventInfoToResponse(EventInfo eventInfo, EventHistoryResponse eventHistoryResponse) {
+
+		if (eventInfo.getResultInfoContainsKey(eventHistoryResponse.getRewardName())) {
+			eventHistoryResponse.setResultInfo(eventInfo.getResultInfoValue(eventHistoryResponse.getRewardName()));
+			if (eventInfo.getResultInfoContainsResponseMessage(eventHistoryResponse.getRewardName())) {
+				eventHistoryResponse.setResponseMessage(
+						eventInfo.getResultInfoResponseMessage(eventHistoryResponse.getRewardName()));
 			}
 		}
+		return eventHistoryResponse;
 	};
-
 }

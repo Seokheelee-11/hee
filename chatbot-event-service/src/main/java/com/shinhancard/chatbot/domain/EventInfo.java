@@ -61,8 +61,30 @@ public class EventInfo {
 	}
 
 	// TODO :: 최소한의 필드만 넣어놨으니 더 추가할 것
+	public Boolean getResultInfoContainsKey(String rewardName) {
+		if (this.getResultInfo().containsKey(rewardName)) {
+			return true;
+		}
+		return false;
+	}
 
-	public boolean isNotValid() {
+	public HashMap<String,String> getResultInfoValue(String rewardName) {
+		return this.getResultInfo().get(rewardName);
+	}
+	
+	public Boolean getResultInfoContainsResponseMessage(String rewardName) {
+		if (this.getResultInfo().get(rewardName).containsKey("responseMessage")) {
+			return true;
+		}
+		return false;
+	}
+	
+	public String getResultInfoResponseMessage(String rewardName) {
+		return this.getResultInfo().get(rewardName).get("responseMessage");
+	}
+	
+	
+	public Boolean isNotValid() {
 
 		// TODO :: 신청가능 기간 및 참여 가능한 상태인지 체크하는 로직
 		// this.startDt,
@@ -144,7 +166,7 @@ public class EventInfo {
 		}
 		return totalProb;
 	}
-	
+
 	public Integer getTotalCount() {
 		int result = 0;
 		Set<String> keys = this.rewardInfo.keySet();
@@ -156,132 +178,127 @@ public class EventInfo {
 	}
 
 	public Boolean getEventDateValidate(LocalDateTime date) {
-		if (this.startDt.isBefore(date) || this.endDt.isAfter(date)) {
+		if (this.startDt.isAfter(date) || this.endDt.isBefore(date)) {
 			return false;
 		}
 		return true;
 	}
 
-
-	
 	public String getReward(List<EventHistory> findEventId) {
-		String result = "default";	
-		
-		if(this.rewardType.isRewardRandomProb()) {
+		String result = "default";
+
+		if (this.rewardType.isRewardRandomProb()) {
 			result = getRewardRandomProb();
-		} else if(this.rewardType.isRewardRandom()) {
+		} else if (this.rewardType.isRewardRandom()) {
 			result = getRewardRandom(findEventId);
-		} else if(this.rewardType.isRewardFCFS()) {
+		} else if (this.rewardType.isRewardFCFS()) {
 			result = getRewardFCFS(findEventId);
-		} else if(this.rewardType.isRewardQuiz()) {
+		} else if (this.rewardType.isRewardQuiz()) {
 			result = "default";
 		}
 		return result;
 	}
-	
-	
+
 	public String getRewardRandomProb() {
 		String result = "";
-		LinkedHashMap<String,Double> applicableWinner = setRandomProbWinner();
+		LinkedHashMap<String, Double> applicableWinner = setRandomProbWinner();
 		Double totalWinnerCount = getLastValue(applicableWinner);
-		
+
 		Random rand = new Random();
-		Double criteria = rand.nextDouble()%totalWinnerCount;
+		Double criteria = rand.nextDouble() % totalWinnerCount;
 		Set<String> keys = applicableWinner.keySet();
-		
-		for(String key : keys) {
-			if(criteria < applicableWinner.get(key)) {
-				result=key;
-				break;
-			}
-		}
-		return result;
-	}
-	
-	public String getRewardRandom(List<EventHistory> findEventId) {
-		String result = "";
-		LinkedHashMap<String,Double> applicableWinner = canApplyWinner(findEventId);
-		
-		Double totalWinnerCount = getLastValue(applicableWinner);
-		
-		Random rand = new Random();
-		int criteria = rand.nextInt(totalWinnerCount.intValue());
-		
-		Set<String> keys = applicableWinner.keySet();	
-		for(String key : keys) {
-			if(criteria < applicableWinner.get(key).intValue()) {
-				result=key;
-				break;
-			}
-		}
-		return result;
-	}
-	public String getRewardFCFS(List<EventHistory> findEventId) {
-		String result = "";
-		LinkedHashMap<String,Double> applicableWinner = canApplyWinner(findEventId);
-		
-		Set<String> keys = applicableWinner.keySet();	
-		for(String key : keys) {
-			if(applicableWinner.get(key)!=0){
+
+		for (String key : keys) {
+			if (criteria < applicableWinner.get(key)) {
 				result = key;
 				break;
 			}
 		}
 		return result;
 	}
-	
-	public LinkedHashMap<String,Double> canApplyWinner(List<EventHistory> findEventId){
-		LinkedHashMap<String,Double> result = new LinkedHashMap<String, Double>();
-		Double totalprob = 0.0;
-		Set<String> keys = this.rewardInfo.keySet();
-		
-		for(String key : keys) {
-			totalprob += this.rewardInfo.get(key);
-			totalprob -= getRewardCount(findEventId, key);
-			result.put(key,totalprob);
+
+	public String getRewardRandom(List<EventHistory> findEventId) {
+		String result = "";
+		LinkedHashMap<String, Double> applicableWinner = canApplyWinner(findEventId);
+
+		Double totalWinnerCount = getLastValue(applicableWinner);
+
+		Random rand = new Random();
+		int criteria = rand.nextInt(totalWinnerCount.intValue());
+
+		Set<String> keys = applicableWinner.keySet();
+		for (String key : keys) {
+			if (criteria < applicableWinner.get(key).intValue()) {
+				result = key;
+				break;
+			}
 		}
 		return result;
 	}
-	
+
+	public String getRewardFCFS(List<EventHistory> findEventId) {
+		String result = "";
+		LinkedHashMap<String, Double> applicableWinner = canApplyWinner(findEventId);
+
+		Set<String> keys = applicableWinner.keySet();
+		for (String key : keys) {
+			if (applicableWinner.get(key) != 0) {
+				result = key;
+				break;
+			}
+		}
+		return result;
+	}
+
+	public LinkedHashMap<String, Double> canApplyWinner(List<EventHistory> findEventId) {
+		LinkedHashMap<String, Double> result = new LinkedHashMap<String, Double>();
+		Double totalprob = 0.0;
+		Set<String> keys = this.rewardInfo.keySet();
+
+		for (String key : keys) {
+			totalprob += this.rewardInfo.get(key);
+			totalprob -= getRewardCount(findEventId, key);
+			result.put(key, totalprob);
+		}
+		return result;
+	}
+
 	public Double getRewardCount(List<EventHistory> findEventId, String key) {
-		Double result=0.0;
-		for(int i=0;i<findEventId.size();i++) {
-			for(int j=0; j<findEventId.get(i).getLogs().size();j++) {
-				if(findEventId.get(i).getLogs().get(j).getRewardName().equals(key)) {
+		Double result = 0.0;
+		for (int i = 0; i < findEventId.size(); i++) {
+			for (int j = 0; j < findEventId.get(i).getLogs().size(); j++) {
+				if (findEventId.get(i).getLogs().get(j).getRewardName().equals(key)) {
 					result += 1;
 				}
 			}
-		}		
+		}
 		return result;
 	}
-	
-	
-	public Double getLastValue(LinkedHashMap<String,Double> inputMap) {
+
+	public Double getLastValue(LinkedHashMap<String, Double> inputMap) {
 		Double result = 0.0;
 		Set<String> keys = inputMap.keySet();
-		for(String key:keys) {
+		for (String key : keys) {
 			result = inputMap.get(key);
 		}
 		return result;
 	}
-	
-	public LinkedHashMap<String,Double> setRandomProbWinner(){
-		LinkedHashMap<String,Double> result = new LinkedHashMap<String, Double>();
+
+	public LinkedHashMap<String, Double> setRandomProbWinner() {
+		LinkedHashMap<String, Double> result = new LinkedHashMap<String, Double>();
 		Double totalprob = 0.0;
 		Set<String> keys = this.rewardInfo.keySet();
-		
-		for(String key : keys) {
+
+		for (String key : keys) {
 			totalprob += this.rewardInfo.get(key);
-			result.put(key,totalprob);
+			result.put(key, totalprob);
 		}
 		return result;
 	}
-	
-	
-	
 
 	public enum RewardType {
-		FCFS, RANDOM, RANDOMPROB,QUIZ; // 랜덤 확률
+		FCFS, RANDOM, RANDOMPROB, QUIZ; // 랜덤 확률
+
 		public boolean isRewardRandom() {
 			if (this.equals(RewardType.RANDOM)) {
 				return true;
@@ -304,7 +321,7 @@ public class EventInfo {
 			}
 			return false;
 		}
-		
+
 		public boolean isRewardQuiz() {
 			if (this.equals(RewardType.QUIZ)) {
 				return true;
@@ -316,46 +333,48 @@ public class EventInfo {
 
 	public enum OverLapType {
 		ALLTIME, MINUTE, HOUR, DAY, MONTH, YEAR;
-		
+
 		public Boolean isAllTime() {
-			if( this.equals(ALLTIME)) {
+			if (this.equals(ALLTIME)) {
 				return true;
 			}
 			return false;
 		}
+
 		public Boolean isMinute() {
-			if( this.equals(MINUTE)) {
+			if (this.equals(MINUTE)) {
 				return true;
 			}
 			return false;
 		}
+
 		public Boolean isHour() {
-			if( this.equals(HOUR)) {
+			if (this.equals(HOUR)) {
 				return true;
 			}
 			return false;
 		}
+
 		public Boolean isDay() {
-			if( this.equals(DAY)) {
+			if (this.equals(DAY)) {
 				return true;
 			}
 			return false;
 		}
+
 		public Boolean isMonth() {
-			if( this.equals(MONTH)) {
+			if (this.equals(MONTH)) {
 				return true;
 			}
 			return false;
 		}
+
 		public Boolean isYear() {
-			if( this.equals(YEAR)) {
+			if (this.equals(YEAR)) {
 				return true;
 			}
 			return false;
 		}
 	}
-	
-
-
 
 }

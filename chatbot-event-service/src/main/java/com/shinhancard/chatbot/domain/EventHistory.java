@@ -2,18 +2,27 @@ package com.shinhancard.chatbot.domain;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.Id;
 
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class EventHistory {
 	@Id
 	private String id;
 
+	@NotEmpty @NotBlank 
 	private String eventId;
+	
+	@NotEmpty @NotBlank
+	@Size(min=10,max=10,message="고객번호는 10자 이여야 합니다.")
 	private String clnn;
 	private String displayName;
 
@@ -22,6 +31,10 @@ public class EventHistory {
 	// TODO :: 최소한의 필드만 넣어놨으니 더 추가할 것
 
 	private LocalDateTime lastModDt;
+	
+	public EventHistory() {
+		this.logs = new ArrayList<EventHistoryLog>();
+	}
 
 	public void addLog(EventHistoryLog log) {
 		this.logs.add(log);
@@ -46,7 +59,7 @@ public class EventHistory {
 	}
 	
 	public EventHistoryLog getLastHistory() {
-		EventHistoryLog result =this.logs.get(this.logs.size());
+		EventHistoryLog result =this.logs.get(this.logs.size()-1);
 		return result;
 	}
 	
