@@ -1,6 +1,7 @@
 package com.shinhancard.chatbot.service;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.shinhancard.chatbot.controller.request.EventInfoRequest;
@@ -17,7 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class EventInfoService {
-
+	@Autowired
+	private ModelMapper modelMapper;
 	
 	private final EventInfoRepository eventInfoRepository;
 
@@ -43,24 +45,34 @@ public class EventInfoService {
 	}
 
 	public EventInfoResponse registEvent(EventInfoRequest eventInfoRequest) {
-		ModelMapper modelMapper = new ModelMapper();
+		
+		
+//		ModelMapper modelMapper = new modelMapper();
 		EventInfo eventInfo = modelMapper.map(eventInfoRequest, EventInfo.class);
 		EventInfoResponse eventInfoResponse = modelMapper.map(eventInfo, EventInfoResponse.class);
+		log.info("eventHistory to EventHistoryResponse Mapping success {}, {}", eventInfoRequest, eventInfo);
+		
 		// resultCode setting
+		
 		ResultCode eventInfoResultCode = ResultCode.SUCCESS;
-
+		log.info("resultCode setting");
+		
 		// 입력값 Validation
 		if (!getInputValidation(eventInfo)) {
 			eventInfoResultCode = ResultCode.FAILED_DEFAULT_INPUT;
 		}
-
+		log.info("입력값 Validation");
+		
 		// validation 체크를 통과한 경우 DB에 저장
 		if (eventInfoResultCode.isSuccess()) {
 			eventInfoRepository.save(eventInfo);
 		}
+		log.info("validation 체크를 통과한 경우 DB에 저장");
+		
 		// Response의 resultCode 채움
 		eventInfoResponse.setResult(eventInfoResultCode);
-
+		log.info("Response의 resultCode 채움");
+		
 		return eventInfoResponse;
 	}
 

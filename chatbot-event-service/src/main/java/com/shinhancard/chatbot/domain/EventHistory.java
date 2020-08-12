@@ -12,8 +12,10 @@ import javax.validation.constraints.Size;
 import org.springframework.data.annotation.Id;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
+@Slf4j
 public class EventHistory {
 	@Id
 	private String id;
@@ -101,20 +103,28 @@ public class EventHistory {
 	}
 
 	public Boolean canIncludeOverLap(EventInfo findEventInfo, EventHistoryLog eventHistoryLog) {
-		if (findEventInfo.getOverLapDateType().isMinute()&& ChronoUnit.MINUTES.between(this.lastModDt,
-				eventHistoryLog.getRegDate()) <= findEventInfo.getOverLapDateCount()) {
+		log.info("minute : {}",ChronoUnit.MINUTES.between(this.lastModDt.withSecond(0).withNano(0),eventHistoryLog.getRegDate().withSecond(0).withNano(0)));
+		log.info("minute : {}",this.lastModDt);
+		log.info("minute : {}",eventHistoryLog.getRegDate());
+		log.info("minute : {}",this.lastModDt.withSecond(0).withNano(0));
+		log.info("minute : {}",this.lastModDt.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0));
+		log.info("minute : {}",this.lastModDt.withDayOfYear(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0));
+		
+		log.info("minute : {}",eventHistoryLog.getRegDate().withSecond(0).withNano(0));
+		if (findEventInfo.getOverLapDateType().isMinute()&& ChronoUnit.MINUTES.between(this.lastModDt.withSecond(0).withNano(0),
+				eventHistoryLog.getRegDate().withSecond(0).withNano(0)) < findEventInfo.getOverLapDateCount()) {
 			return false;
-		}else if (findEventInfo.getOverLapDateType().isHour() && ChronoUnit.HOURS.between(this.lastModDt,
-				eventHistoryLog.getRegDate()) <= findEventInfo.getOverLapDateCount()) {
+		}else if (findEventInfo.getOverLapDateType().isHour() && ChronoUnit.HOURS.between(this.lastModDt.withMinute(0).withSecond(0).withNano(0),
+				eventHistoryLog.getRegDate().withMinute(0).withSecond(0).withNano(0)) < findEventInfo.getOverLapDateCount()) {
 			return false;
-		} else if (findEventInfo.getOverLapDateType().isDay() && ChronoUnit.DAYS.between(this.lastModDt,
-				eventHistoryLog.getRegDate()) <= findEventInfo.getOverLapDateCount()) {
+		} else if (findEventInfo.getOverLapDateType().isDay() && ChronoUnit.DAYS.between(this.lastModDt.withHour(0).withMinute(0).withSecond(0).withNano(0),
+				eventHistoryLog.getRegDate().withHour(0).withMinute(0).withSecond(0).withNano(0)) < findEventInfo.getOverLapDateCount()) {
 			return false;
-		} else if (findEventInfo.getOverLapDateType().isMonth() && ChronoUnit.MONTHS.between(this.lastModDt,
-				eventHistoryLog.getRegDate()) <= findEventInfo.getOverLapDateCount()) {
+		} else if (findEventInfo.getOverLapDateType().isMonth() && ChronoUnit.MONTHS.between(this.lastModDt.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0),
+				eventHistoryLog.getRegDate().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0)) < findEventInfo.getOverLapDateCount()) {
 			return false;
-		} else if (findEventInfo.getOverLapDateType().isYear() && ChronoUnit.YEARS.between(this.lastModDt,
-				eventHistoryLog.getRegDate()) <= findEventInfo.getOverLapDateCount()) {
+		} else if (findEventInfo.getOverLapDateType().isYear() && ChronoUnit.YEARS.between(this.lastModDt.withDayOfYear(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0),
+				eventHistoryLog.getRegDate().withDayOfYear(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0)) < findEventInfo.getOverLapDateCount()) {
 			return false;
 		}
 		return true;

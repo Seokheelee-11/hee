@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -24,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class EventHistoryService {
+	@Autowired
+	private ModelMapper modelMapper;
 
 	private final EventHistoryRepository eventHistoryRepository;
 	private final EventInfoRepository eventInfoRepository;
@@ -56,7 +59,7 @@ public class EventHistoryService {
 	}
 
 	public EventHistoryResponse registEventHistory(EventHistoryRequest eventHistoryRequest) {
-		ModelMapper modelMapper = new ModelMapper();
+		// ModelMapper modelMapper = new ModelMapper();
 		log.info("mapper 생성자 만들어짐");
 		EventHistory eventHistory = modelMapper.map(eventHistoryRequest, EventHistory.class);
 		log.info("eventHistoryRequest : {}, eventHistory : {}", eventHistoryRequest.toString(),
@@ -127,7 +130,7 @@ public class EventHistoryService {
 		modelMapper.addMappings(eventHistoryToResponse);
 		eventHistoryResponse = modelMapper.map(eventHistory, EventHistoryResponse.class);
 		log.info("eventHistory to EventHistoryResponse Mapping success {}, {}", eventHistory, eventHistoryResponse);
-		//modelMapper.addMappings(eventInfoToResponse);
+		// modelMapper.addMappings(eventInfoToResponse);
 		// result = modelMapper.map(findEventInfo, EventHistoryResponse.class);
 		eventHistoryResponse = eventInfoToResponse(findEventInfo, eventHistoryResponse);
 		log.info("EventInfo to EventHistoryResponse Mapping success {}, {}", findEventInfo, eventHistoryResponse);
@@ -139,11 +142,10 @@ public class EventHistoryService {
 		ResultCode eventHistoryResultCode = ResultCode.SUCCESS;
 
 		// Event 신청 내역이 존재하는데, overLap이 False인 경우 "이미 이벤트에 신청한 것"
+		// OverLap에 따른 이벤트 신청이 가능한지 파악함
 		if (!findEventInfo.getOverLapTF()) {
 			eventHistoryResultCode = ResultCode.FAILED_ALREADY_APPLIED;
-		}
-		// OverLap에 따른 이벤트 신청이 가능한지 파악함
-		else if (findEventInfo.needOverLapLogics()) {
+		} else if (findEventInfo.needOverLapLogics()) {
 			if (!eventHistory.canApplyOverLap(findEventInfo, eventHistoryLog)) {
 				eventHistoryResultCode = ResultCode.FAILED_TIME_OVERLAP;
 			}
@@ -205,15 +207,17 @@ public class EventHistoryService {
 			EventHistoryLog eventHistoryLog) {
 		if (findEventInfo.getRewardType().isRewardFCFS() || findEventInfo.getRewardType().isRewardRandom()) {
 			if (findEventInfo.getTotalCount() > getTotalOrderCount(findEventId)) {
-				return false;
+				return true;
 			}
 		} else if (findEventInfo.getRewardType().isRewardQuiz()) {
 			// quiz 정답인지 판단하는 로직
-			if (!getCorrectAnswer(findEventInfo, eventHistoryLog)) {
-				return false;
+			if (getCorrectAnswer(findEventInfo, eventHistoryLog)) {
+				return true;
 			}
+		} else if (findEventInfo.getRewardType().isRewardRandomProb()) {
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	public Integer getTotalOrderCount(List<EventHistory> findEventId) {
@@ -282,6 +286,8 @@ public class EventHistoryService {
 						eventInfo.getResultInfoResponseMessage(eventHistoryResponse.getRewardName()));
 			}
 		}
+		eventHistoryResponse.setDisplayName(eventInfo.getDisplayName());
+
 		return eventHistoryResponse;
 	};
 }
