@@ -36,9 +36,14 @@ public class EventHistoryController {
 		return eventHistoryRepository.findAll();
 	}
 
-	@GetMapping("{id}")
+	@GetMapping("id/{id}")
 	public EventHistory getEventHistoryById(@PathVariable String id) {
 		return eventHistoryService.getEventHistoryById(id);
+	}
+	
+	@GetMapping("eventId/{eventId}")
+	public List<EventHistory> getEventHistoryByEventId(@PathVariable String eventId) {
+		return eventHistoryService.getEventHistoryByEventId(eventId);
 	}
 
 	@PostMapping

@@ -34,6 +34,10 @@ public class EventHistoryService {
 	public EventHistory getEventHistoryById(String id) {
 		return eventHistoryRepository.findOneById(id);
 	}
+	
+	public List<EventHistory> getEventHistoryByEventId(String eventId) {
+		return eventHistoryRepository.findAllByEventId(eventId);
+	}
 
 	public EventHistory updateEventHistory(String id, EventHistory event) {
 		EventHistory savedEvent = eventHistoryRepository.findOneById(event.getId());

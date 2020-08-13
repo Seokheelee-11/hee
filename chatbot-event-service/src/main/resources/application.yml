@@ -6,3 +6,9 @@ spring:
       database: chatbot-3
       username: chatbotAdmin
       password: bot123!
+      
+logging:
+  level:
+    root: error
+
+    
