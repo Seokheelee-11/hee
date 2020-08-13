@@ -130,10 +130,10 @@ public class EventHistoryService {
 		modelMapper.addMappings(eventHistoryToResponse);
 		eventHistoryResponse = modelMapper.map(eventHistory, EventHistoryResponse.class);
 		log.info("eventHistory to EventHistoryResponse Mapping success {}, {}", eventHistory, eventHistoryResponse);
-		// modelMapper.addMappings(eventInfoToResponse);
-		// result = modelMapper.map(findEventInfo, EventHistoryResponse.class);
+
 		eventHistoryResponse = eventInfoToResponse(findEventInfo, eventHistoryResponse);
 		log.info("EventInfo to EventHistoryResponse Mapping success {}, {}", findEventInfo, eventHistoryResponse);
+
 		return eventHistoryResponse;
 	}
 
@@ -216,7 +216,12 @@ public class EventHistoryService {
 			}
 		} else if (findEventInfo.getRewardType().isRewardRandomProb()) {
 			return true;
+		} else if (findEventInfo.getRewardType().isRewardQuizLimit()) {
+			if (findEventInfo.getTotalCount() > getTotalOrderCount(findEventId) && getCorrectAnswer(findEventInfo, eventHistoryLog)) {
+				return true;
+			}
 		}
+
 		return false;
 	}
 
@@ -258,7 +263,6 @@ public class EventHistoryService {
 
 	public PropertyMap<EventHistory, EventHistoryResponse> eventHistoryToResponse = new PropertyMap<EventHistory, EventHistoryResponse>() {
 		protected void configure() {
-
 			map().setRewardName(source.getLastHistory().getRewardName());
 			map().setParam(source.getLastHistory().getParam());
 		}
@@ -279,14 +283,19 @@ public class EventHistoryService {
 
 	public EventHistoryResponse eventInfoToResponse(EventInfo eventInfo, EventHistoryResponse eventHistoryResponse) {
 
+		log.info("reward name setting");
 		if (eventInfo.getResultInfoContainsKey(eventHistoryResponse.getRewardName())) {
 			eventHistoryResponse.setResultInfo(eventInfo.getResultInfoValue(eventHistoryResponse.getRewardName()));
+			log.info("response Message Setting");
 			if (eventInfo.getResultInfoContainsResponseMessage(eventHistoryResponse.getRewardName())) {
 				eventHistoryResponse.setResponseMessage(
 						eventInfo.getResultInfoResponseMessage(eventHistoryResponse.getRewardName()));
 			}
 		}
 		eventHistoryResponse.setDisplayName(eventInfo.getDisplayName());
+		if (eventInfo.getOverLapTF()) {
+			eventHistoryResponse.setDDateCount(eventInfo);
+		}
 
 		return eventHistoryResponse;
 	};

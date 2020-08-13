@@ -193,7 +193,7 @@ public class EventInfo {
 			result = getRewardRandom(findEventId);
 		} else if (this.rewardType.isRewardFCFS()) {
 			result = getRewardFCFS(findEventId);
-		} else if (this.rewardType.isRewardQuiz()) {
+		} else if (this.rewardType.isRewardQuiz()||this.rewardType.isRewardQuizLimit()) {
 			result = "default";
 		}
 		return result;
@@ -297,7 +297,7 @@ public class EventInfo {
 	}
 
 	public enum RewardType {
-		FCFS, RANDOM, RANDOMPROB, QUIZ; // 랜덤 확률
+		FCFS, RANDOM, RANDOMPROB, QUIZ, QUIZ_LIMIT; // 랜덤 확률
 
 		public boolean isRewardRandom() {
 			if (this.equals(RewardType.RANDOM)) {
@@ -324,6 +324,12 @@ public class EventInfo {
 
 		public boolean isRewardQuiz() {
 			if (this.equals(RewardType.QUIZ)) {
+				return true;
+			}
+			return false;
+		}
+		public boolean isRewardQuizLimit() {
+			if (this.equals(RewardType.QUIZ_LIMIT)) {
 				return true;
 			}
 			return false;
