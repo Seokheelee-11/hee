@@ -68,22 +68,21 @@ public class EventInfo {
 		return false;
 	}
 
-	public HashMap<String,String> getResultInfoValue(String rewardName) {
+	public HashMap<String, String> getResultInfoValue(String rewardName) {
 		return this.getResultInfo().get(rewardName);
 	}
-	
+
 	public Boolean getResultInfoContainsResponseMessage(String rewardName) {
 		if (this.getResultInfo().get(rewardName).containsKey("responseMessage")) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	public String getResultInfoResponseMessage(String rewardName) {
 		return this.getResultInfo().get(rewardName).get("responseMessage");
 	}
-	
-	
+
 	public Boolean isNotValid() {
 
 		// TODO :: 신청가능 기간 및 참여 가능한 상태인지 체크하는 로직
@@ -193,9 +192,12 @@ public class EventInfo {
 			result = getRewardRandom(findEventId);
 		} else if (this.rewardType.isRewardFCFS()) {
 			result = getRewardFCFS(findEventId);
-		} else if (this.rewardType.isRewardQuiz()||this.rewardType.isRewardQuizLimit()) {
-			result = "default";
+		} else if (this.rewardType.isRewardQuiz()) {
+			result = getRewardRandomProb();
+		} else if (this.rewardType.isRewardQuizLimit()) {
+			result = getRewardRandom(findEventId);
 		}
+
 		return result;
 	}
 
@@ -328,6 +330,7 @@ public class EventInfo {
 			}
 			return false;
 		}
+
 		public boolean isRewardQuizLimit() {
 			if (this.equals(RewardType.QUIZ_LIMIT)) {
 				return true;

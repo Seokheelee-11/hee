@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class EventInfoService {
 	@Autowired
 	private ModelMapper modelMapper;
-	
+
 	private final EventInfoRepository eventInfoRepository;
 
 	public EventInfo getEventById(String id) {
@@ -45,34 +45,34 @@ public class EventInfoService {
 	}
 
 	public EventInfoResponse registEvent(EventInfoRequest eventInfoRequest) {
-		
-		
+
+		log.info("eventInfo Service Start");
 //		ModelMapper modelMapper = new modelMapper();
 		EventInfo eventInfo = modelMapper.map(eventInfoRequest, EventInfo.class);
 		EventInfoResponse eventInfoResponse = modelMapper.map(eventInfo, EventInfoResponse.class);
 		log.info("eventHistory to EventHistoryResponse Mapping success {}, {}", eventInfoRequest, eventInfo);
-		
+
 		// resultCode setting
-		
+
 		ResultCode eventInfoResultCode = ResultCode.SUCCESS;
 		log.info("resultCode setting");
-		
+
 		// 입력값 Validation
 		if (!getInputValidation(eventInfo)) {
 			eventInfoResultCode = ResultCode.FAILED_DEFAULT_INPUT;
 		}
 		log.info("입력값 Validation");
-		
+
 		// validation 체크를 통과한 경우 DB에 저장
 		if (eventInfoResultCode.isSuccess()) {
 			eventInfoRepository.save(eventInfo);
 		}
 		log.info("validation 체크를 통과한 경우 DB에 저장");
-		
+
 		// Response의 resultCode 채움
 		eventInfoResponse.setResult(eventInfoResultCode);
 		log.info("Response의 resultCode 채움");
-		
+
 		return eventInfoResponse;
 	}
 
@@ -99,8 +99,10 @@ public class EventInfoService {
 			if (!eventInfo.getValidationRewardDefaultInput()) {
 				resultCode = ResultCode.FAILED_NO_LIMIT_INPUT;
 			}
+			log.info("prob validation");
 			// RANDOMPROB일 때 확률의 값이 1 이하인가?
-			if (eventInfo.getRewardType().equals(RewardType.RANDOMPROB)) {
+			if (RewardType.RANDOMPROB.equals(eventInfo.getRewardType())
+					|| RewardType.QUIZ.equals(eventInfo.getRewardType())) {
 				if (!eventInfo.getValidationRewardRandomProbInput()) {
 					resultCode = ResultCode.FAILED_RANDOMPROB_OVER_ONE;
 				}
