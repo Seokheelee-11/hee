@@ -49,6 +49,6 @@ public class DefaultController {
 		log.error("------------------------------------------------------------------");
 		log.error("starbucks : {} tumbler : {} mask : {}, etc : {}", starbucks, tumbler, mask, etc);
 	}
-	//controler
+	//control
 	
 }
